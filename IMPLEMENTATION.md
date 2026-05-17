@@ -113,14 +113,14 @@ Each file contains only `package <dirname>` as its first line. This establishes 
 
 ---
 
-## Phase 2 — Configuration
+## Phase 2 — Configuration ✅
 
-### Task 2.1 — Define config structs and defaults
+### Task 2.1 — Define config structs and defaults ✅
 
 **File:** `internal/config/config.go`
 
 **Steps:**
-- [ ] Replace the stub with the following types:
+- [x] Replace the stub with the following types:
 
 ```go
 package config
@@ -169,25 +169,25 @@ type OutputConfig struct {
 }
 ```
 
-- [ ] Implement `Defaults() Config` that returns values matching SPEC.md §14.1 exactly:
+- [x] Implement `Defaults() Config` that returns values matching SPEC.md §14.1 exactly:
   - `Model.Provider = "lmstudio"`, `Model.BaseURL = "http://localhost:1234/v1"`, `Model.Model = "qwen2.5-coder-7b"`, `Model.EmbedModel = "nomic-embed-text-v1.5"`, `Model.ContextWindow = 8192`, `Model.Temperature = 0.2`, `Model.MaxRetries = 3`, `Model.RetryDelayMS = 1000`
   - `Agent.MaxSteps = 50`, `Agent.WorktreeBase = ".xdreamer/worktrees"`
   - `RAG.Enabled = true`, `RAG.ChunkSize = 512`, `RAG.ChunkOverlap = 64`, `RAG.TopK = 10`, `RAG.IndexDir = ".xdreamer/index"`, `RAG.Ignore = ["vendor/", "node_modules/", ".git/"]`
   - `Memory.File = ".xdreamer/MEMORY.md"`
   - `Output.LogDir = "."`
 
-- [ ] Write `internal/config/config_test.go` verifying every default value
+- [x] Write `internal/config/config_test.go` verifying every default value
 
-**Acceptance:** `go test ./internal/config/...` passes.
+**Acceptance:** `go test ./internal/config/...` passes. ✅
 
 ---
 
-### Task 2.2 — Implement config loader
+### Task 2.2 — Implement config loader ✅
 
 **File:** `internal/config/loader.go`
 
 **Steps:**
-- [ ] Implement:
+- [x] Implement:
 
 ```go
 // Load builds a Config by merging defaults, global config, project config,
@@ -195,34 +195,34 @@ type OutputConfig struct {
 func Load(projectDir string) (*Config, error)
 ```
 
-- [ ] Layer order:
+- [x] Layer order:
   1. Start from `Defaults()`
   2. Merge `~/.xdreamer/config.toml` — missing file is **not** an error, return the default as-is
   3. Merge `<projectDir>/.xdreamer.toml` — missing file is **not** an error
   4. Apply env var overrides per SPEC.md §14.2 mapping
 
-- [ ] Implement a private `mergeEnvVars(cfg *Config)` function that applies each env var:
+- [x] Implement a private `mergeEnvVars(cfg *Config)` function that applies each env var:
   - Read with `os.Getenv`; skip if empty
   - Parse `XDREAMER_AUTO`: accept `"true"` or `"1"` (case-insensitive) → `true`; anything else → `false`
   - Parse `XDREAMER_MAX_STEPS` with `strconv.Atoi`; on parse error, return `fmt.Errorf("XDREAMER_MAX_STEPS: %w", err)`
 
-- [ ] Write `internal/config/loader_test.go`:
+- [x] Write `internal/config/loader_test.go`:
   - Test defaults returned when no files exist and no env vars set
   - Test project `.xdreamer.toml` overrides a global field
   - Test `XDREAMER_MODEL_BASE_URL` env var overrides file config
   - Test `XDREAMER_AUTO=true` sets `Agent.Auto = true`
   - Test invalid `XDREAMER_MAX_STEPS` returns an error
 
-**Acceptance:** `go test ./internal/config/...` passes.
+**Acceptance:** `go test ./internal/config/...` passes. ✅
 
 ---
 
-### Task 2.3 — Implement config validator
+### Task 2.3 — Implement config validator ✅
 
 **File:** `internal/config/validator.go`
 
 **Steps:**
-- [ ] Implement:
+- [x] Implement:
 
 ```go
 var (
@@ -237,7 +237,7 @@ var (
 func Validate(cfg *Config) error
 ```
 
-- [ ] Validate rules:
+- [x] Validate rules:
   - `Model.BaseURL` must not be empty → `ErrMissingBaseURL`
   - `Model.Model` must not be empty → `ErrMissingModel`
   - `Model.EmbedModel` must not be empty → `ErrMissingEmbedModel`
@@ -245,11 +245,11 @@ func Validate(cfg *Config) error
   - `RAG.ChunkSize` must be > 0 if `RAG.Enabled` → `ErrInvalidChunkSize`
   - Return the first error found (not a combined error)
 
-- [ ] Write `internal/config/validator_test.go`:
+- [x] Write `internal/config/validator_test.go`:
   - Test that `Defaults()` passes `Validate()`
   - Test each invalid field returns its sentinel error
 
-**Acceptance:** `go test ./internal/config/...` passes.
+**Acceptance:** `go test ./internal/config/...` passes. ✅
 
 ---
 
@@ -1420,7 +1420,7 @@ Verify every SPEC section is covered by at least one implementation task:
 ## Completion Checklist
 
 - [x] Phase 1 — Project scaffold
-- [ ] Phase 2 — Configuration (structs + loader + validator)
+- [x] Phase 2 — Configuration (structs + loader + validator)
 - [ ] Phase 3 — Model provider interface + LM Studio implementation
 - [ ] Phase 4 — Tool registry + all 13 built-in tools
 - [ ] Phase 5 — Git worktree manager
