@@ -253,14 +253,14 @@ func Validate(cfg *Config) error
 
 ---
 
-## Phase 3 — Model Provider
+## Phase 3 — Model Provider ✅
 
-### Task 3.1 — Define Provider interface and types
+### Task 3.1 — Define Provider interface and types ✅
 
 **File:** `internal/model/provider.go`
 
 **Steps:**
-- [ ] Replace the stub with:
+- [x] Replace the stub with:
 
 ```go
 package model
@@ -309,18 +309,18 @@ type Provider interface {
 }
 ```
 
-- [ ] No concrete types in this file — only the interface and shared types.
+- [x] No concrete types in this file — only the interface and shared types.
 
-**Acceptance:** `go build ./internal/model/...` exits 0.
+**Acceptance:** `go build ./internal/model/...` exits 0. ✅
 
 ---
 
-### Task 3.2 — Implement LM Studio provider
+### Task 3.2 — Implement LM Studio provider ✅
 
 **File:** `internal/model/lmstudio.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 type LMStudio struct {
@@ -335,9 +335,9 @@ type LMStudio struct {
 func NewLMStudio(baseURL, model, embedModel string, temperature float32, maxRetries int, retryDelayMS int) *LMStudio
 ```
 
-- [ ] `NewLMStudio`: configure `openai.ClientConfig` with `BaseURL` and an empty API key (LM Studio does not require one); wrap in `openai.NewClientWithConfig`.
+- [x] `NewLMStudio`: configure `openai.ClientConfig` with `BaseURL` and an empty API key (LM Studio does not require one); wrap in `openai.NewClientWithConfig`.
 
-- [ ] `Chat()` implementation:
+- [x] `Chat()` implementation:
   1. Convert `[]model.Message` → `[]openai.ChatCompletionMessage` (map each Role and ToolCalls field)
   2. Convert `[]model.ToolDefinition` → `[]openai.Tool` with `Type: openai.ToolTypeFunction`
   3. Call `client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{...})`
@@ -345,12 +345,12 @@ func NewLMStudio(baseURL, model, embedModel string, temperature float32, maxRetr
   5. Convert `openai.ChatCompletionMessage` back to `model.Response`
   6. Set `Response.Done = true` if the response content (trimmed) ends with the line `"DONE"`
 
-- [ ] `Embed()` implementation:
+- [x] `Embed()` implementation:
   1. Call `client.CreateEmbeddings(ctx, openai.EmbeddingRequest{Model: embedModel, Input: []string{text}})`
   2. On retry-eligible errors, retry up to `maxRetries` times
   3. Return `response.Data[0].Embedding` as `[]float32`
 
-- [ ] Write `internal/model/lmstudio_test.go` using `httptest.NewServer`:
+- [x] Write `internal/model/lmstudio_test.go` using `httptest.NewServer`:
   - Test Chat success with tool calls in response
   - Test Chat with DONE in response sets `Response.Done = true`
   - Test Chat retries on 429 and succeeds on second attempt
@@ -358,7 +358,7 @@ func NewLMStudio(baseURL, model, embedModel string, temperature float32, maxRetr
   - Test Embed success
   - Test Embed error propagation
 
-**Acceptance:** `go test ./internal/model/...` passes.
+**Acceptance:** `go test ./internal/model/...` passes. ✅
 
 ---
 
@@ -1421,7 +1421,7 @@ Verify every SPEC section is covered by at least one implementation task:
 
 - [x] Phase 1 — Project scaffold
 - [x] Phase 2 — Configuration (structs + loader + validator)
-- [ ] Phase 3 — Model provider interface + LM Studio implementation
+- [x] Phase 3 — Model provider interface + LM Studio implementation
 - [ ] Phase 4 — Tool registry + all 13 built-in tools
 - [ ] Phase 5 — Git worktree manager
 - [ ] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
