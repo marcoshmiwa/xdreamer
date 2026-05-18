@@ -669,14 +669,14 @@ func (e *Engine) Close() error
 
 ---
 
-## Phase 7 — Memory System
+## Phase 7 — Memory System ✅
 
-### Task 7.1 — Implement memory
+### Task 7.1 — Implement memory ✅
 
 **File:** `internal/memory/memory.go`
 
 **Steps:**
-- [ ] Replace the stub with:
+- [x] Replace the stub with:
 
 ```go
 package memory
@@ -701,17 +701,12 @@ func (m *Memory) Append(section, text string)
 func (m *Memory) Save() error
 ```
 
-- [ ] `Load()`: if `!cfg.Enabled`, return `&Memory{enabled: false}` — all methods on this are no-ops
-- [ ] If enabled: read `cfg.File` with `os.ReadFile`; if file not found, start with empty string; store content
-- [ ] `Append()`: if disabled, return; append `"\n## " + section + "\n" + text + "\n"` to `m.content`
-- [ ] `Save()`: if disabled, return nil; `os.MkdirAll(filepath.Dir(m.filePath), 0755)` then `os.WriteFile`
+- [x] `Load()`: disabled → `&Memory{enabled: false}`; enabled + missing file → empty content (not error)
+- [x] `Append()`: disabled no-op; appends `"\n## <section>\n<text>\n"` to content
+- [x] `Save()`: disabled no-op returns nil; `MkdirAll` + `WriteFile` when enabled
+- [x] `memory_test.go`: 5 disabled tests (no file access) + 6 enabled tests (missing file, load existing, append, multi-section order, save roundtrip, nested parent dirs)
 
-- [ ] Write `internal/memory/memory_test.go`:
-  - Disabled memory — all methods are no-ops, no file access
-  - Enabled memory — Load + Append + Save roundtrip reads the same content back
-  - Missing file with enabled memory — starts empty without error
-
-**Acceptance:** `go test ./internal/memory/...` passes.
+**Acceptance:** `go test ./internal/memory/...` passes. ✅ (11/11)
 
 ---
 
@@ -1257,7 +1252,7 @@ Verify every SPEC section is covered by at least one implementation task:
 - [x] Phase 4 — Tool registry + all 13 built-in tools
 - [x] Phase 5 — Git worktree manager
 - [x] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
-- [ ] Phase 7 — Memory system
+- [x] Phase 7 — Memory system
 - [ ] Phase 8 — Agent (transcript + prompt + confirmer + runner + output)
 - [ ] Phase 9 — CLI (root + wire + run + file + repl)
 - [ ] Phase 10 — End-to-end smoke test
