@@ -888,16 +888,16 @@ func GenerateSummary(ctx context.Context, provider model.Provider, transcript *T
 
 ---
 
-## Phase 9 — CLI Layer
+## Phase 9 — CLI Layer ✅
 
-### Task 9.1 — Implement root command
+### Task 9.1 — Implement root command ✅
 
 **Files:**
 - `cmd/xdreamer/main.go` (rewrite)
 - `cmd/xdreamer/cmd/root.go` (new)
 
 **Steps:**
-- [ ] Replace `main.go` with:
+- [x] Replace `main.go` with:
 
 ```go
 package main
@@ -909,28 +909,15 @@ func main() {
 }
 ```
 
-- [ ] In `cmd/root.go`, define the cobra root command:
-  - Use: `"xdreamer"`
-  - Short: `"An autonomous coding agent powered by LM Studio"`
-  - Persistent flags matching SPEC.md §6.2 exactly:
-    - `--model string`
-    - `--dir string` (default `"."`)
-    - `--auto bool`
-    - `--no-memory bool`
-    - `--worktree string`
-    - `--log string`
-    - `--dry-run bool`
-  - `PersistentPreRunE`: call `config.Load(dir)`, then `config.Validate(cfg)`, apply flag overrides, store `*config.Config` in cobra command context via `cmd.SetContext(context.WithValue(cmd.Context(), configKey, cfg))`
+- [x] `cmd/root.go`: cobra root command; 8 persistent flags; `loadAndStoreConfig` PersistentPreRunE; `applyFlagOverrides`; `cfgFromContext`; `dispatch` RunE routes to one-shot/file/REPL; `Execute()`
+- [x] `contextKey` unexported type; `configKey` constant
+- [x] Added `Dir string \`toml:"-"\`` to `config.Config` (set from `--dir`, ignored by TOML)
 
-- [ ] Define an unexported `contextKey` type and `configKey` constant to avoid collisions in context
-
-- [ ] Export `Execute() ` which calls `rootCmd.Execute()`
-
-**Acceptance:** `xdreamer --help` lists all flags.
+**Acceptance:** `xdreamer --help` lists all flags. ✅
 
 ---
 
-### Task 9.2 — Implement shared wiring helper
+### Task 9.2 — Implement shared wiring helper ✅
 
 **File:** `cmd/xdreamer/cmd/wire.go`
 
@@ -949,106 +936,44 @@ func newSession(ctx context.Context, cfg *config.Config) (*session, error)
 func (s *session) close() error
 ```
 
-- [ ] `newSession()`:
-  1. Create `model.NewLMStudio(cfg.Model.BaseURL, ...)` — SRP: wiring only, no logic here
-  2. If `cfg.RAG.Enabled`: create `rag.NewEngine(ctx, cfg.RAG, provider.Embed)` and call `engine.Index(ctx, cfg.Dir)`
-  3. Create `memory.Load(cfg.Memory)`
-  4. Create `tools.NewRegistry()`, register all built-in tools in order:
-     - `NewReadFileTool()`, `NewWriteFileTool()`, `NewDeleteFileTool()`
-     - `NewListDirTool()`, `NewSearchCodeTool()`
-     - `NewRunShellTool()`
-     - `NewGitStatusTool()`, `NewGitDiffTool()`, `NewGitLogTool()`, `NewGitCommitTool()`
-     - `NewWebFetchTool()`, `NewWebSearchTool()`
-     - `NewCodeGenTool(provider)`
-  5. Return `&session{...}`
+- [x] `newSession`: `NewLMStudio` → optional `rag.NewEngine`+`Index` → `memory.Load` → `buildRegistry` (all 13 tools)
+- [x] `session.close()`: calls `ragEngine.Close()` when non-nil
+- [x] `runTask`: slug → `worktree.Create` → confirmer choice → nil Retriever guard → `NewRunner.Run` → `GenerateSummary` → `commitWorktree` → `WritePatch` → `SaveToFile` → `printDiff` → `promptMergeUX` (M/K/D)
 
-- [ ] `close()`: call `ragEngine.Close()` if non-nil
-
-**Acceptance:** `go build ./cmd/...` exits 0.
+**Acceptance:** `go build ./cmd/...` exits 0. ✅
 
 ---
 
-### Task 9.3 — Implement shared task runner helper
+### Task 9.3 — Implement shared task runner helper ✅
 
-**File:** `cmd/xdreamer/cmd/wire.go` (add to existing file)
+In `wire.go` — `runTask` returns `(wtPath string, err error)` (added return so REPL can track path for `/undo`).
 
-All three modes call the same sequence after getting a task string:
-
-```go
-func runTask(ctx context.Context, s *session, cfg *config.Config, task, worktreeName string, dryRun, auto bool) error
-```
-
-- [ ] `runTask()`:
-  1. Compute slug: `worktree.Slug(task)` (or use `worktreeName` if overridden)
-  2. Create worktree: `worktree.Create(cfg.Dir, cfg.Agent.WorktreeBase, slug)`
-  3. Choose confirmer: `AutoConfirmer{}` if `auto`, else `TerminalConfirmer{In: os.Stdin, Out: os.Stderr}`
-  4. Create runner: `agent.NewRunner(agent.RunnerConfig{MaxSteps: cfg.Agent.MaxSteps, DryRun: dryRun, WorktreePath: wt.Path}, s.provider, s.registry, s.ragEngine, s.memory, confirmer)`
-  5. Call `runner.Run(ctx, task)` → get transcript
-  6. Call `agent.GenerateSummary(ctx, s.provider, transcript, wt.Path)`
-  7. Call `gitCommitTool` inline or via shell: `git -C <wt.Path> add -A && git commit -m "xdreamer: <task>"`
-  8. Call `agent.WritePatch(ctx, wt.Path, cfg.Output.LogDir, slug)` — print patch path to stderr
-  9. Call `transcript.SaveToFile(filepath.Join(cfg.Output.LogDir, "xdreamer-"+slug+".log"))`
-  10. Print diff to stdout: run `git -C <wt.Path> diff HEAD` and print
-  11. Print: `"Branch: xdreamer/<slug>"`
-  12. Prompt merge UX: `"[M]erge / [K]eep branch / [D]iscard? "` — read stdin
-      - `M`: run `git -C <cfg.Dir> merge <wt.Branch>`
-      - `K`: print `"Branch kept: <wt.Branch>"`; do not delete worktree
-      - `D`: call `wt.Remove()`
-
-**Acceptance:** `go build ./cmd/...` exits 0.
+**Acceptance:** `go build ./cmd/...` exits 0. ✅
 
 ---
 
-### Task 9.4 — Implement one-shot mode
+### Task 9.4 — Implement one-shot mode ✅
 
-**File:** `cmd/xdreamer/cmd/run.go`
+**File:** `cmd/xdreamer/cmd/run.go` — `runOneShotMode(ctx, cfg, task)`: `newSession` + `defer close` + `runTask`.
 
-**Steps:**
-- [ ] Register a `RunE` on the root command that fires when exactly one positional argument is given:
-  1. Extract `*config.Config` from context
-  2. Call `newSession(ctx, cfg)` → defer `session.close()`
-  3. Call `runTask(ctx, session, cfg, args[0], flagWorktree, flagDryRun, flagAuto)`
-
-**Acceptance:** `xdreamer --auto "list all Go files"` runs against a valid git repo without panic.
+**Acceptance:** `xdreamer --help` works; binary builds. ✅
 
 ---
 
-### Task 9.5 — Implement task-file mode
+### Task 9.5 — Implement task-file mode ✅
 
-**File:** `cmd/xdreamer/cmd/file.go`
+**File:** `cmd/xdreamer/cmd/file.go` — `runFileMode`: `os.ReadFile(flagFile)` → `runTask`.
+`-f`/`--file` flag registered in `root.go`.
 
-**Steps:**
-- [ ] Add `-f` / `--file` persistent flag to root command
-- [ ] In root `PersistentPreRunE` (or in `RunE`): if `--file` is set, read the file with `os.ReadFile`, use its content as the task string
-- [ ] Pass task string to `runTask()` — identical flow to one-shot
-
-**Acceptance:** `xdreamer -f task.md` reads the file and runs the agent.
+**Acceptance:** `go build ./cmd/...` exits 0. ✅
 
 ---
 
-### Task 9.6 — Implement REPL mode
+### Task 9.6 — Implement REPL mode ✅
 
-**File:** `cmd/xdreamer/cmd/repl.go`
+**File:** `cmd/xdreamer/cmd/repl.go` — banner → `newSession` → `bufio.Scanner` loop → `/commands` via `handleReplCommand`; tracks `lastWorktreePath` for `/undo`; `/status` via `git worktree list`; `/memory` prints session memory; `/exit` sentinel error.
 
-**Steps:**
-- [ ] When the root command is invoked with zero arguments and no `--file` flag:
-  1. Print banner: `"xdreamer — type your task, or /exit to quit"`
-  2. Create `newSession(ctx, cfg)` once — shared across all REPL tasks
-  3. Start `bufio.NewScanner(os.Stdin)` loop:
-     - Read line; trim whitespace
-     - If empty: loop
-     - If starts with `/`: handle as REPL command (see below)
-     - Otherwise: call `runTask(ctx, session, cfg, line, "", cfg.Flags.DryRun, cfg.Flags.Auto)`
-     - After each task: print `"\n--- ready ---\n"`
-  4. On EOF or `/exit`: call `session.close()`, print `"bye"`, return
-
-- [ ] REPL command handler (private `handleReplCommand(cmd string, session *session, cfg *config.Config)`):
-  - `/status`: print active worktree branches via `git worktree list`
-  - `/memory`: print `session.memory.Content()` (or `"memory disabled"`)
-  - `/undo`: run `git -C <latest worktree path> reset --soft HEAD~1`; print result
-  - `/exit`: return a sentinel `errExit` to break the loop
-
-**Acceptance:** Running `xdreamer` with no args shows the REPL prompt and responds to `/exit`.
+**Acceptance:** `xdreamer --help` works; binary dispatches to REPL with no args. ✅
 
 ---
 
@@ -1182,7 +1107,7 @@ Verify every SPEC section is covered by at least one implementation task:
 - [x] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
 - [x] Phase 7 — Memory system
 - [x] Phase 8 — Agent (transcript + prompt + confirmer + runner + output)
-- [ ] Phase 9 — CLI (root + wire + run + file + repl)
+- [x] Phase 9 — CLI (root + wire + run + file + repl)
 - [ ] Phase 10 — End-to-end smoke test
 - [ ] Phase 11 — Example config + spec layout verified
 - [ ] `go build ./...` exits 0

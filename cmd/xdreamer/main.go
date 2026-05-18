@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/xdreamer/xdreamer/cmd/xdreamer/cmd"
 
 func main() {
-	fmt.Println("xdreamer v0.1.0")
+	cmd.Execute()
 }

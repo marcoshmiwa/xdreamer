@@ -2,6 +2,10 @@ package config
 
 // Config holds all runtime configuration for xdreamer.
 type Config struct {
+	// Dir is the project root directory. Set from the --dir CLI flag; never
+	// written to or read from TOML config files.
+	Dir string `toml:"-"`
+
 	Model  ModelConfig  `toml:"model"`
 	Agent  AgentConfig  `toml:"agent"`
 	RAG    RAGConfig    `toml:"rag"`
