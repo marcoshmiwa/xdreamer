@@ -710,14 +710,14 @@ func (m *Memory) Save() error
 
 ---
 
-## Phase 8 — Agent
+## Phase 8 — Agent ✅
 
-### Task 8.1 — Implement Transcript
+### Task 8.1 — Implement Transcript ✅
 
 **File:** `internal/agent/transcript.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 package agent
@@ -747,27 +747,19 @@ func (t *Transcript) WriteTo(w io.Writer) error
 func (t *Transcript) SaveToFile(path string) error
 ```
 
-- [ ] `WriteTo()`: write a human-readable log. Each step:
-  ```
-  === Step N ===
-  [User] <UserMessage>
-  [LLM]  <LLMResponse>
-  [Tool: <ToolName>] params: <Params>
-  [Result] <Output>
-  ```
+- [x] `WriteLog()` (renamed from WriteTo to avoid io.WriterTo vet conflict); `writeStep`+`writeToolResult` helpers; [skipped]/[error] labels; `SaveToFile` with MkdirAll
+- [x] `transcript_test.go`: AddStep, WriteLog key-field check, skipped/error labels, SaveToFile with nested dir
 
-- [ ] Write `internal/agent/transcript_test.go`
-
-**Acceptance:** `go test ./internal/agent/...` passes.
+**Acceptance:** `go test -trimpath ./internal/agent/...` passes. ✅
 
 ---
 
-### Task 8.2 — Implement system prompt renderer
+### Task 8.2 — Implement system prompt renderer ✅
 
 **File:** `internal/agent/prompt.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 type promptData struct {
@@ -790,19 +782,19 @@ Rules:
 func renderSystemPrompt(worktreePath, memoryContent string) (string, error)
 ```
 
-- [ ] Use `text/template` to render the template — do not use `strings.Replace`
-- [ ] Write a test verifying the template renders the worktree path and memory content correctly
+- [x] `text/template` with package-level `parsedPromptTmpl`; `promptData` struct; `renderSystemPrompt`
+- [x] `prompt_test.go`: worktree path injection, memory injection, DONE instruction, rules present
 
-**Acceptance:** `go test ./internal/agent/...` passes.
+**Acceptance:** `go test -trimpath ./internal/agent/...` passes. ✅
 
 ---
 
-### Task 8.3 — Implement Confirmer interface
+### Task 8.3 — Implement Confirmer interface ✅
 
 **File:** `internal/agent/confirm.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 // Confirmer decides whether a destructive action may proceed.
@@ -820,31 +812,20 @@ type TerminalConfirmer struct {
 type AutoConfirmer struct{}
 ```
 
-- [ ] `TerminalConfirmer.Confirm()`:
-  1. Print to `Out`: `"[destructive] <toolName>: <description>\nProceed? (y/N): "`
-  2. Read one line from `In` with `bufio.NewScanner`
-  3. Return true if input (trimmed, lowercased) is `"y"` or `"yes"`
+- [x] `TerminalConfirmer`: bufio.Scanner on In; [destructive] label; case-insensitive y/yes check
+- [x] `AutoConfirmer`: value receiver, always true
+- [x] `confirm_test.go`: AutoConfirmer 3-case table, y/YES/n/empty/prompt-content tests
 
-- [ ] `AutoConfirmer.Confirm()`: always return `true, nil`
-
-- [ ] Write `internal/agent/confirm_test.go`:
-  - `AutoConfirmer` always returns true
-  - `TerminalConfirmer` with mock reader returning `"y"` returns true
-  - `TerminalConfirmer` with mock reader returning `"n"` returns false
-  - `TerminalConfirmer` with mock reader returning `"YES"` returns true (case-insensitive)
-
-**Acceptance:** `go test ./internal/agent/...` passes.
+**Acceptance:** `go test -trimpath ./internal/agent/...` passes. ✅
 
 ---
 
-### Task 8.4 — Implement Runner (step loop)
+### Task 8.4 — Implement Runner (step loop) ✅
 
 **File:** `internal/agent/runner.go`
 
-This is the most critical file. Implement with care. Every dependency is an interface.
-
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 type RunnerConfig struct {
@@ -875,63 +856,21 @@ func NewRunner(
 func (r *Runner) Run(ctx context.Context, task string) (*Transcript, error)
 ```
 
-- [ ] `Run()` — implement exactly this sequence:
+- [x] `Retriever` interface in runner.go (DIP: `*rag.Engine` satisfies it automatically)
+- [x] `executeToolCall` extracted helper (SRP); `appendRAGContext` never mutates history
+- [x] `ErrMaxStepsExceeded` sentinel; `lastUserMessage`; `buildRAGMessage`
+- [x] `runner_test.go`: seqProvider+mockRetriever+mockTool mocks; 2-step run, max-steps, dry-run, denied, unknown-tool, RAG-injection; `lastUserMessage`/`buildRAGMessage` unit tests
 
-```
-1.  Render system prompt via renderSystemPrompt(cfg.WorktreePath, memory.Content())
-2.  history := []model.Message{{Role: RoleSystem, Content: systemPrompt}, {Role: RoleUser, Content: task}}
-3.  stepCount := 0
-4.  LOOP:
-    a.  stepCount++; if stepCount > cfg.MaxSteps → return nil, ErrMaxStepsExceeded
-    b.  ragChunks := r.rag.Retrieve(ctx, lastUserMessage(history))
-    c.  contextMsg := buildRAGMessage(ragChunks)  // "Relevant context:\n<chunks>"
-    d.  promptHistory := append(history, contextMsg)  // do NOT mutate history
-    e.  response, err := r.provider.Chat(ctx, promptHistory, r.registry.Definitions())
-    f.  if err → return nil, fmt.Errorf("step %d: chat: %w", stepCount, err)
-    g.  append response as model.Message{Role: RoleAssistant, Content: response.Content, ToolCalls: response.ToolCalls} to history
-    h.  if response.Done → break loop
-    i.  if len(response.ToolCalls) == 0 → append {Role: RoleUser, Content: "continue"} to history; loop
-    j.  step := Step{Number: stepCount, LLMResponse: response.Content}
-    k.  for each toolCall in response.ToolCalls:
-        i.   tool, ok := r.registry.Get(toolCall.Name); if !ok → record ToolResult{IsError: true}, append error to history, continue
-        ii.  if cfg.DryRun → record ToolResult{Skipped: true}, append "[dry-run] skipped" to history, continue
-        iii. if tool.Destructive() → allowed, err = r.confirmer.Confirm(ctx, toolCall.Name, toolCall.Arguments)
-             if !allowed → record ToolResult{Skipped: true}, append "[denied] user denied" to history, continue
-        iv.  output, execErr := tool.Execute(ctx, json.RawMessage(toolCall.Arguments))
-        v.   toolResult := ToolResult{ToolName: toolCall.Name, Params: toolCall.Arguments, Output: output, IsError: execErr != nil}
-        vi.  append model.Message{Role: RoleTool, ToolCallID: toolCall.ID, Content: output} to history
-        vii. append toolResult to step.ToolResults
-    l.  r.transcript.AddStep(step)
-5.  return r.transcript, nil
-```
-
-- [ ] Declare sentinel errors:
-  ```go
-  var ErrMaxStepsExceeded = errors.New("max steps exceeded")
-  ```
-
-- [ ] Private helper `lastUserMessage(history []model.Message) string`: return content of the last message with `Role == RoleUser`
-
-- [ ] Private helper `buildRAGMessage(chunks []rag.Chunk) model.Message`: format as `"Relevant context:\n\n<file>:<line>\n<content>\n---\n..."`, Role: RoleSystem
-
-- [ ] Write `internal/agent/runner_test.go` using mock implementations of all interfaces:
-  - Test 2-step run: first response has a tool call, second response has Done=true → transcript has 2 steps
-  - Test max steps exceeded returns `ErrMaxStepsExceeded`
-  - Test dry-run: tool call is skipped, result shows Skipped=true
-  - Test destructive tool denied by confirmer: ToolResult.Skipped=true
-  - Test unknown tool name: ToolResult.IsError=true
-  - Test RAG context is injected into prompt
-
-**Acceptance:** `go test ./internal/agent/...` passes.
+**Acceptance:** `go test -trimpath ./internal/agent/...` passes. ✅
 
 ---
 
-### Task 8.5 — Implement output writer
+### Task 8.5 — Implement output writer ✅
 
 **File:** `internal/agent/output.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 // WritePatch runs git diff HEAD in worktreePath and saves the output as a patch file.
@@ -941,22 +880,11 @@ func WritePatch(ctx context.Context, worktreePath, outputDir, slug string) (patc
 func GenerateSummary(ctx context.Context, provider model.Provider, transcript *Transcript, worktreePath string) error
 ```
 
-- [ ] `WritePatch()`:
-  1. Run `git -C <worktreePath> diff HEAD` via `exec.CommandContext`
-  2. Write output to `filepath.Join(outputDir, "xdreamer-"+slug+".patch")`
-  3. Return the patch file path
+- [x] `WritePatch`: `git -C worktreePath diff HEAD` → `xdreamer-<slug>.patch`; `MkdirAll` for outputDir
+- [x] `GenerateSummary`: `buildSummaryMessages` joins step LLMResponses; writes `SUMMARY.md`
+- [x] `output_test.go`: `initGitRepo` helper; patch file creation, path suffix, nested outputDir; summary content, transcript-in-request capture
 
-- [ ] `GenerateSummary()`:
-  1. Build a single user message: `"Summarize what you did during this coding session in markdown format. Be concise."`
-  2. Append the transcript as context: join all step LLMResponse values
-  3. Call `provider.Chat(ctx, messages, nil)` with no tools
-  4. Write `response.Content` to `filepath.Join(worktreePath, "SUMMARY.md")`
-
-- [ ] Write tests:
-  - `WritePatch` with a temp git repo that has an unstaged change
-  - `GenerateSummary` with a mock provider, verify SUMMARY.md is written with model content
-
-**Acceptance:** `go test ./internal/agent/...` passes.
+**Acceptance:** `go test -trimpath ./internal/agent/...` passes. ✅ (31/31)
 
 ---
 
@@ -1253,7 +1181,7 @@ Verify every SPEC section is covered by at least one implementation task:
 - [x] Phase 5 — Git worktree manager
 - [x] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
 - [x] Phase 7 — Memory system
-- [ ] Phase 8 — Agent (transcript + prompt + confirmer + runner + output)
+- [x] Phase 8 — Agent (transcript + prompt + confirmer + runner + output)
 - [ ] Phase 9 — CLI (root + wire + run + file + repl)
 - [ ] Phase 10 — End-to-end smoke test
 - [ ] Phase 11 — Example config + spec layout verified
