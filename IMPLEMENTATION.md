@@ -495,14 +495,14 @@ func (r *Registry) Definitions() []model.ToolDefinition
 
 ---
 
-## Phase 5 — Git Worktree
+## Phase 5 — Git Worktree ✅
 
-### Task 5.1 — Implement worktree manager
+### Task 5.1 — Implement worktree manager ✅
 
 **File:** `internal/worktree/worktree.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 package worktree
@@ -527,24 +527,12 @@ func Create(root, base, slug string) (*Worktree, error)
 func (w *Worktree) Remove() error
 ```
 
-- [ ] `Slug()`: lowercase the input; replace all characters not in `[a-z0-9-]` with `-`; collapse consecutive `-` into one; trim leading/trailing `-`; truncate to 40 chars.
+- [x] `Slug()`: lowercase; `slugIllegal` regex replaces non-[a-z0-9-]; `slugMultiDash` collapses dashes; trim; truncate to 40 with trailing-dash trim
+- [x] `Create()`: `verifyGitRepo` → `addWorktree` (tries `-b`, falls back to attach on existing branch)
+- [x] `Remove()`: `git worktree remove --force` + `git branch -D`; shared `gitRun` helper
+- [x] `worktree_test.go`: 11-case Slug table test, trailing-dash truncation edge case, Create/Remove roundtrip, existing-branch attach, ErrNotGitRepo
 
-- [ ] `Create()`:
-  1. Verify `root` is a git repo: run `git -C <root> rev-parse --git-dir` — if error, return `ErrNotGitRepo`
-  2. Set `branch = "xdreamer/" + slug`, `path = filepath.Join(root, base, slug)`
-  3. Run `git -C <root> worktree add -b <branch> <path>` via `exec.Command`
-  4. If that fails because the branch exists: run `git -C <root> worktree add <path> <branch>`
-  5. Return `&Worktree{Branch: branch, Path: path, Root: root}`
-
-- [ ] `Remove()`: run `git -C <root> worktree remove --force <path>` then `git -C <root> branch -D <branch>`
-
-- [ ] Write `internal/worktree/worktree_test.go`:
-  - Init a temp repo (`git init && git commit --allow-empty -m init`)
-  - Test `Slug` with spaces, special chars, long strings (table-driven)
-  - Test `Create` and `Remove` roundtrip
-  - Test `Create` on a non-git dir returns `ErrNotGitRepo`
-
-**Acceptance:** `go test ./internal/worktree/...` passes.
+**Acceptance:** `go test ./internal/worktree/...` passes. ✅ (15/15)
 
 ---
 
@@ -1291,7 +1279,7 @@ Verify every SPEC section is covered by at least one implementation task:
 - [x] Phase 2 — Configuration (structs + loader + validator)
 - [x] Phase 3 — Model provider interface + LM Studio implementation
 - [x] Phase 4 — Tool registry + all 13 built-in tools
-- [ ] Phase 5 — Git worktree manager
+- [x] Phase 5 — Git worktree manager
 - [ ] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
 - [ ] Phase 7 — Memory system
 - [ ] Phase 8 — Agent (transcript + prompt + confirmer + runner + output)
