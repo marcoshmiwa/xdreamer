@@ -362,14 +362,14 @@ func NewLMStudio(baseURL, model, embedModel string, temperature float32, maxRetr
 
 ---
 
-## Phase 4 — Tool Registry
+## Phase 4 — Tool Registry ✅
 
-### Task 4.1 — Define Tool interface and Registry
+### Task 4.1 — Define Tool interface and Registry ✅
 
 **File:** `internal/tools/tool.go`
 
 **Steps:**
-- [ ] Replace the stub with:
+- [x] Replace the stub with:
 
 ```go
 package tools
@@ -409,221 +409,89 @@ func (r *Registry) All() []Tool
 func (r *Registry) Definitions() []model.ToolDefinition
 ```
 
-- [ ] `Definitions()` must map each `Tool` to `model.ToolDefinition{Name, Description, Parameters}`.
-- [ ] Write `internal/tools/tool_test.go`:
+- [x] `Definitions()` must map each `Tool` to `model.ToolDefinition{Name, Description, Parameters}`.
+- [x] Write `internal/tools/tool_test.go`:
   - Register a mock tool, verify `Get` finds it, verify `Definitions()` output matches
 
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
-### Task 4.2 — Implement file tools
+### Task 4.2 — Implement file tools ✅
 
 **File:** `internal/tools/files.go`
 
-**Implement three tools as unexported structs with a public constructor each:**
+- [x] `read_file` — safe; `write_file` — destructive; `delete_file` — destructive
+- [x] `NewReadFileTool()`, `NewWriteFileTool()`, `NewDeleteFileTool()` exported
+- [x] `files_test.go` with subtests using `t.TempDir()`
 
-**`readFileTool` — `Name() = "read_file"` — not destructive**
-- Parameters: `{"path": {"type": "string", "description": "File path to read"}}`
-- Execute: `os.ReadFile(path)` — return content as string; wrap error with `"read file"`
-
-**`writeFileTool` — `Name() = "write_file"` — destructive**
-- Parameters: `{"path": {"type": "string"}, "content": {"type": "string"}}`
-- Execute: `os.MkdirAll(filepath.Dir(path), 0755)` then `os.WriteFile(path, []byte(content), 0644)` — return `"written: <path>"`
-
-**`deleteFileTool` — `Name() = "delete_file"` — destructive**
-- Parameters: `{"path": {"type": "string"}}`
-- Execute: `os.Remove(path)` — return `"deleted: <path>"`; if not found return `fmt.Errorf("delete file: %w", os.ErrNotExist)`
-
-- [ ] Export constructors: `NewReadFileTool() Tool`, `NewWriteFileTool() Tool`, `NewDeleteFileTool() Tool`
-- [ ] Write `internal/tools/files_test.go` with table-driven tests using `t.TempDir()`
-
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
-### Task 4.3 — Implement directory tool
+### Task 4.3 — Implement directory tool ✅
 
 **File:** `internal/tools/dir.go`
 
-**Implement: `listDirTool` — `Name() = "list_dir"` — not destructive**
+- [x] `list_dir` — safe; flat (`os.ReadDir`) and recursive (`filepath.WalkDir`); skips `.git` and `.xdreamer`
+- [x] `dir_test.go` verifying flat/recursive listing and `.git` exclusion
 
-- Parameters:
-  ```json
-  {
-    "path":      {"type": "string"},
-    "recursive": {"type": "boolean"}
-  }
-  ```
-- Execute:
-  - If `recursive` is false: `os.ReadDir(path)`, return `Name (DIR)` or `Name (FILE)` per entry, one per line
-  - If `recursive` is true: `filepath.WalkDir(path, ...)`, return relative paths one per line
-  - Skip `.git` and `.xdreamer` directories in both modes
-  - Return error wrapped with `"list dir"` if path does not exist
-
-- [ ] Export: `NewListDirTool() Tool`
-- [ ] Write tests verifying flat and recursive listing, and that `.git` is excluded
-
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
-### Task 4.4 — Implement search tool
+### Task 4.4 — Implement search tool ✅
 
 **File:** `internal/tools/search.go`
 
-**Implement: `searchCodeTool` — `Name() = "search_code"` — not destructive**
+- [x] `search_code` — safe; `const maxSearchMatches = 200`; `globMatches()` handles `**/` prefix
+- [x] `search_test.go` with table-driven `globMatches` tests and integration tests
 
-- Parameters:
-  ```json
-  {
-    "pattern": {"type": "string", "description": "Regex pattern"},
-    "glob":    {"type": "string", "description": "File glob, e.g. **/*.go"},
-    "root":    {"type": "string", "description": "Directory to search"}
-  }
-  ```
-- Execute:
-  1. Compile `pattern` with `regexp.Compile`; return error on invalid regex
-  2. Walk `root` with `filepath.WalkDir`; for each file, check if its relative path matches `glob` using `filepath.Match`
-  3. For matching files, scan line by line and collect lines matching the regex
-  4. Format each match as `"<filepath>:<linenum>: <content>"`
-  5. Cap output at 200 matches; append `"[output truncated at 200 matches]"` if exceeded
-  6. Return empty string (not error) if no matches found
-
-- [ ] Declare `const maxSearchMatches = 200` — no magic number in logic
-- [ ] Export: `NewSearchCodeTool() Tool`
-- [ ] Write table-driven tests with a temp directory containing known file content
-
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
-### Task 4.5 — Implement shell tool
+### Task 4.5 — Implement shell tool ✅
 
 **File:** `internal/tools/shell.go`
 
-**Implement: `runShellTool` — `Name() = "run_shell"` — destructive**
+- [x] `run_shell` — destructive; interpreter constants; non-zero exit prefixed with `[exit N]`
+- [x] `shell_test.go`: success, non-zero exit, context cancellation
 
-- Parameters:
-  ```json
-  {
-    "command": {"type": "string", "description": "Shell command to execute"},
-    "workdir": {"type": "string", "description": "Working directory"}
-  }
-  ```
-- Execute:
-  1. Choose interpreter: `"sh"`, `"-c"` on non-Windows; `"cmd"`, `"/C"` on Windows (`runtime.GOOS == "windows"`)
-  2. Build `exec.CommandContext(ctx, interpreter, flag, command)`
-  3. Set `cmd.Dir = workdir`
-  4. Capture combined stdout+stderr via `cmd.CombinedOutput()`
-  5. If exit code != 0, prefix output with `"[exit <code>]\n"`
-  6. Return trimmed output; wrap exec errors with `"run shell"`
-
-- [ ] Export: `NewRunShellTool() Tool`
-- [ ] Declare interpreter constants: `const (unixShell = "sh"; unixFlag = "-c"; winShell = "cmd"; winFlag = "/C")`
-- [ ] Write tests: successful command, non-zero exit code, context cancellation
-
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
-### Task 4.6 — Implement git tools
+### Task 4.6 — Implement git tools ✅
 
 **File:** `internal/tools/git.go`
 
-All four tools execute git commands via `exec.CommandContext`. Extract a shared private helper:
+- [x] `runGit` shared helper; `git_status`, `git_diff`, `git_log`, `git_commit`
+- [x] `git_test.go` using `initGitRepo` helper with temp dir
 
-```go
-func runGit(ctx context.Context, workdir string, args ...string) (string, error)
-```
-
-**Implement four tools:**
-
-**`gitStatusTool` — `Name() = "git_status"` — not destructive**
-- Parameters: `{"workdir": {"type": "string"}}`
-- Execute: `runGit(ctx, workdir, "status", "--short")`
-
-**`gitDiffTool` — `Name() = "git_diff"` — not destructive**
-- Parameters: `{"workdir": {"type": "string"}, "staged": {"type": "boolean"}}`
-- Execute: if staged → `runGit(ctx, workdir, "diff", "--staged")` else `runGit(ctx, workdir, "diff")`
-
-**`gitLogTool` — `Name() = "git_log"` — not destructive**
-- Parameters: `{"workdir": {"type": "string"}, "n": {"type": "integer"}}`
-- Execute: `runGit(ctx, workdir, "log", "--oneline", fmt.Sprintf("-%d", n))`; default `n=10` if zero
-
-**`gitCommitTool` — `Name() = "git_commit"` — destructive**
-- Parameters: `{"workdir": {"type": "string"}, "message": {"type": "string"}}`
-- Execute: `runGit(ctx, workdir, "add", "-A")` then `runGit(ctx, workdir, "commit", "-m", message)`; return combined output
-
-- [ ] Export: `NewGitStatusTool() Tool`, `NewGitDiffTool() Tool`, `NewGitLogTool() Tool`, `NewGitCommitTool() Tool`
-- [ ] Write `internal/tools/git_test.go` using a temp dir with `git init && git commit --allow-empty -m "init"`
-
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
-### Task 4.7 — Implement web tools
+### Task 4.7 — Implement web tools ✅
 
 **File:** `internal/tools/web.go`
 
-**Implement two tools:**
+- [x] `web_fetch` — HTML stripping, `defaultMaxBytes`; `web_search` — DDG API, `ddgBaseURL` var for test injection
+- [x] `web_test.go` with `httptest.NewServer` mocks
 
-**`webFetchTool` — `Name() = "web_fetch"` — not destructive**
-- Parameters: `{"url": {"type": "string"}, "max_bytes": {"type": "integer"}}`
-- Execute:
-  1. Build `http.NewRequestWithContext(ctx, http.MethodGet, url, nil)`
-  2. Use a shared `http.Client{Timeout: 15 * time.Second}` (package-level var, not per-call)
-  3. Read up to `max_bytes` bytes (default 32000 if zero)
-  4. If Content-Type contains `text/html`: strip tags using `regexp.MustCompile("<[^>]+>").ReplaceAll`
-  5. Return trimmed string; wrap errors with `"web fetch"`
-
-**`webSearchTool` — `Name() = "web_search"` — not destructive**
-- Parameters: `{"query": {"type": "string"}, "max_results": {"type": "integer"}}`
-- Execute:
-  1. GET `https://api.duckduckgo.com/?q=<url.QueryEscape(query)>&format=json&no_redirect=1`
-  2. Parse JSON — unmarshal only `AbstractText string` and `RelatedTopics []struct{ Text string }`
-  3. Collect `AbstractText` (if non-empty) plus `RelatedTopics[*].Text` up to `max_results` (default 5)
-  4. Return results joined by `"\n\n"`; wrap errors with `"web search"`
-
-- [ ] Declare `const (webFetchTimeout = 15 * time.Second; defaultMaxBytes = 32000; defaultMaxResults = 5)`
-- [ ] Export: `NewWebFetchTool() Tool`, `NewWebSearchTool() Tool`
-- [ ] Write tests with `httptest.NewServer`
-
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
-### Task 4.8 — Implement generate_code tool
+### Task 4.8 — Implement generate_code tool ✅
 
 **File:** `internal/tools/codegen.go`
 
-**Implement: `codeGenTool` — `Name() = "generate_code"` — not destructive**
+- [x] `codeGenTool` with injected `model.Provider`; single non-tool Chat call
+- [x] `codegen_test.go` with `mockProvider` and `capturingMockProvider`
 
-- This tool depends on `model.Provider` (Dependency Inversion: inject via constructor, not global):
-
-```go
-type codeGenTool struct {
-    provider model.Provider
-}
-
-func NewCodeGenTool(p model.Provider) Tool
-```
-
-- Parameters:
-  ```json
-  {
-    "prompt":   {"type": "string", "description": "Description of the code to generate"},
-    "language": {"type": "string", "description": "Target programming language"}
-  }
-  ```
-- Execute:
-  1. Build a single `model.Message{Role: RoleUser, Content: fmt.Sprintf("Write %s code for: %s\nRespond with only the code, no explanation.", language, prompt)}`
-  2. Call `provider.Chat(ctx, []model.Message{msg}, nil)` — no tools, no loop
-  3. Return `response.Content`
-
-- [ ] Write `internal/tools/codegen_test.go` with a mock `model.Provider`
-
-**Acceptance:** `go test ./internal/tools/...` passes.
+**Acceptance:** `go test ./internal/tools/...` passes. ✅
 
 ---
 
@@ -1422,7 +1290,7 @@ Verify every SPEC section is covered by at least one implementation task:
 - [x] Phase 1 — Project scaffold
 - [x] Phase 2 — Configuration (structs + loader + validator)
 - [x] Phase 3 — Model provider interface + LM Studio implementation
-- [ ] Phase 4 — Tool registry + all 13 built-in tools
+- [x] Phase 4 — Tool registry + all 13 built-in tools
 - [ ] Phase 5 — Git worktree manager
 - [ ] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
 - [ ] Phase 7 — Memory system
