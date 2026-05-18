@@ -536,14 +536,20 @@ func (w *Worktree) Remove() error
 
 ---
 
-## Phase 6 — RAG Engine
+## Phase 6 — RAG Engine ✅
 
-### Task 6.1 — Implement text chunker
+> **Note — Windows App Control:** On this machine, test binaries for packages
+> importing `chromem-go` or `tiktoken-go` must be run with `go test -trimpath`
+> to avoid being blocked by the Application Control policy. All rag tests pass
+> (24/24) when run with that flag. `go build ./...` and `go vet ./...` are
+> unaffected. Other machines / CI environments are not impacted.
+
+### Task 6.1 — Implement text chunker ✅
 
 **File:** `internal/rag/chunker.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 package rag
@@ -567,31 +573,20 @@ func NewChunker(chunkSize, chunkOverlap int) *Chunker
 func (c *Chunker) ChunkFile(filePath string, content []byte) ([]Chunk, error)
 ```
 
-- [ ] `ChunkFile()`:
-  1. Split content by newline into lines
-  2. Use `tiktoken-go` with encoding `cl100k_base` to count tokens per line
-  3. Accumulate lines into a chunk until the token count reaches `chunkSize`
-  4. At each chunk boundary, carry over the last `chunkOverlap` tokens worth of lines into the next chunk
-  5. Compute `Hash = fmt.Sprintf("%x", sha256.Sum256([]byte(chunk.Content)))`
-  6. Return empty slice (not error) for empty files
+- [x] `ChunkFile()`: `expandChunk` accumulates lines; `nextChunkStart` walks back for overlap; `hashContent` = hex(sha256)
+- [x] `const encodingName = "cl100k_base"`; `requireEncoding(t)` helper skips tests if BPE data unavailable
+- [x] `chunker_test.go`: empty, single chunk, multi-chunk unique-line content, overlap check, hash determinism
 
-- [ ] Declare `const encodingName = "cl100k_base"` — no bare string in logic
-
-- [ ] Write `internal/rag/chunker_test.go`:
-  - Empty file → zero chunks
-  - File smaller than one chunk → one chunk
-  - File larger than one chunk → multiple chunks; verify overlap content
-
-**Acceptance:** `go test ./internal/rag/...` passes.
+**Acceptance:** `go test -trimpath ./internal/rag/...` passes (24/24). ✅
 
 ---
 
-### Task 6.2 — Implement vector store
+### Task 6.2 — Implement vector store ✅
 
 **File:** `internal/rag/store.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 type EmbedFunc func(ctx context.Context, text string) ([]float32, error)
@@ -608,27 +603,21 @@ func (s *Store) Query(ctx context.Context, query string, topK int, embed EmbedFu
 func (s *Store) Close() error
 ```
 
-- [ ] `OpenStore()`: create `indexDir` with `os.MkdirAll`; open `chromem.NewPersistentDB(filepath.Join(indexDir, "vectors.db"), false)`; get-or-create a collection named `"codebase"`
+- [x] `OpenStore`: `chromem.NewPersistentDB` + `GetOrCreateCollection("codebase", nil, nil)`
+- [x] `Upsert`: explicit `Embedding` on `chromem.Document`; `isAlreadyExistsErr` skips duplicates
+- [x] `Query`: `embedFn` → `QueryEmbedding`; `collection.Count()` guards topK
+- [x] `store_test.go`: `fixedEmbedFunc`, upsert+query, empty store, duplicate no-error, metadata roundtrip
 
-- [ ] `Upsert()`: for each chunk, call `embed(ctx, chunk.Content)`; add to collection with document ID = `chunk.Hash` and metadata `{"file": chunk.FilePath, "line": strconv.Itoa(chunk.StartLine), "content": chunk.Content}`; skip if ID already exists
-
-- [ ] `Query()`: embed query string, call `collection.Query(ctx, queryEmbedding, topK, nil, nil)`; reconstruct `[]Chunk` from result metadata
-
-- [ ] Write `internal/rag/store_test.go` using `t.TempDir()`:
-  - Use a deterministic mock `EmbedFunc` that returns a fixed vector per text
-  - Upsert 5 chunks, query, verify results are returned
-  - Verify duplicate hashes are not stored twice
-
-**Acceptance:** `go test ./internal/rag/...` passes.
+**Acceptance:** `go test -trimpath ./internal/rag/...` passes. ✅
 
 ---
 
-### Task 6.3 — Implement index manifest
+### Task 6.3 — Implement index manifest ✅
 
 **File:** `internal/rag/manifest.go`
 
 **Steps:**
-- [ ] Define:
+- [x] Define:
 
 ```go
 type manifest struct {
@@ -641,23 +630,20 @@ func (m *manifest) isChanged(filePath, hash string) bool
 func (m *manifest) mark(filePath, hash string)
 ```
 
-- [ ] `loadManifest()`: read `<indexDir>/manifest.json`; if not found, return empty manifest (not error)
-- [ ] `save()`: marshal manifest to JSON and write to `<indexDir>/manifest.json`
-- [ ] `isChanged()`: return true if path is not in `Files` or hash differs
-- [ ] `mark()`: update `Files[filePath] = hash`
+- [x] `loadManifest`: missing file → empty manifest (not error); `save`: `MkdirAll` + `WriteFile`
+- [x] `isChanged`: absent or hash mismatch → true; `mark`: updates map
+- [x] `manifest_test.go`: new, isChanged, mark+isChanged, save+load roundtrip, missing file, nested dir
 
-- [ ] Write `internal/rag/manifest_test.go` using `t.TempDir()`
-
-**Acceptance:** `go test ./internal/rag/...` passes.
+**Acceptance:** `go test -trimpath ./internal/rag/...` passes. ✅
 
 ---
 
-### Task 6.4 — Implement RAG engine orchestrator
+### Task 6.4 — Implement RAG engine orchestrator ✅
 
 **File:** `internal/rag/engine.go`
 
 **Steps:**
-- [ ] Replace the stub with:
+- [x] Replace the stub with:
 
 ```go
 type Engine struct {
@@ -674,22 +660,12 @@ func (e *Engine) Retrieve(ctx context.Context, query string) ([]Chunk, error)
 func (e *Engine) Close() error
 ```
 
-- [ ] `NewEngine()`: call `OpenStore`, `loadManifest`, create `NewChunker`
+- [x] `NewEngine`: `OpenStore` + `loadManifest` + `NewChunker`
+- [x] `Index`: WalkDir → `shouldIgnoreDir` (name match + filepath.Match) → `isBinary` (null byte probe) → hash → manifest check → chunk → upsert → mark → save
+- [x] `Retrieve`: `store.Query` with `cfg.TopK`
+- [x] `engine_test.go`: 3-file project index+retrieve, vendor dir skipped, binary file skipped, incremental (embed count unchanged on second index), `isBinary` table test, `shouldIgnoreDir` table test
 
-- [ ] `Index()`:
-  1. `filepath.WalkDir(projectRoot, ...)` to visit all files
-  2. Skip directories matching any pattern in `cfg.Ignore` (prefix match or `filepath.Match`)
-  3. Skip binary files: read first 512 bytes; if any byte is 0x00, skip
-  4. Read file; compute SHA-256 hash; skip if `manifest.isChanged` returns false
-  5. Call `chunker.ChunkFile`; call `store.Upsert` with chunks and `embedFn`
-  6. Call `manifest.mark(filePath, hash)` on success
-  7. After all files: call `manifest.save(cfg.IndexDir)`
-
-- [ ] `Retrieve()`: call `store.Query(ctx, query, cfg.TopK, embedFn)` and return results
-
-- [ ] Write `internal/rag/engine_test.go` with a temp project containing 3 Go files
-
-**Acceptance:** `go test ./internal/rag/...` passes.
+**Acceptance:** `go test -trimpath ./internal/rag/...` passes. ✅
 
 ---
 
@@ -1280,7 +1256,7 @@ Verify every SPEC section is covered by at least one implementation task:
 - [x] Phase 3 — Model provider interface + LM Studio implementation
 - [x] Phase 4 — Tool registry + all 13 built-in tools
 - [x] Phase 5 — Git worktree manager
-- [ ] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
+- [x] Phase 6 — RAG engine (chunker + manifest + store + orchestrator)
 - [ ] Phase 7 — Memory system
 - [ ] Phase 8 — Agent (transcript + prompt + confirmer + runner + output)
 - [ ] Phase 9 — CLI (root + wire + run + file + repl)
