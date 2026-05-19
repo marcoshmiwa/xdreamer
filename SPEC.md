@@ -447,47 +447,49 @@ log_dir         = "."
 xdreamer/
 ├── cmd/
 │   └── xdreamer/
-│       ├── main.go              # entrypoint — wires all dependencies
+│       ├── main.go              # entrypoint — calls cmd.Execute()
 │       └── cmd/
-│           ├── root.go          # cobra root command, persistent flags
+│           ├── root.go          # cobra root command, persistent flags, dispatch
+│           ├── wire.go          # session, newSession, runTask, merge UX
 │           ├── run.go           # one-shot mode
 │           ├── file.go          # task-file mode (-f flag)
-│           └── repl.go          # REPL mode
+│           └── repl.go          # REPL mode + /commands
 ├── internal/
 │   ├── agent/
-│   │   ├── runner.go            # step loop
-│   │   ├── confirm.go           # Confirmer interface + implementations
-│   │   ├── output.go            # patch writer
-│   │   ├── transcript.go        # Transcript type + writer
-│   │   └── prompt.go            # system prompt template rendering
+│   │   ├── confirm.go           # Confirmer interface + TerminalConfirmer + AutoConfirmer
+│   │   ├── output.go            # WritePatch, GenerateSummary
+│   │   ├── prompt.go            # system prompt template rendering
+│   │   ├── runner.go            # step loop, Retriever interface, ErrMaxStepsExceeded
+│   │   └── transcript.go        # Transcript, Step, ToolResult, WriteLog, SaveToFile
 │   ├── config/
-│   │   ├── config.go            # struct definitions + Defaults()
+│   │   ├── config.go            # Config structs + Defaults() + Dir field
 │   │   ├── loader.go            # TOML merge + env var override
-│   │   └── validator.go         # Validate() — check required fields
+│   │   └── validator.go         # Validate() — sentinel errors
 │   ├── memory/
-│   │   └── memory.go            # Load / Append / Save
+│   │   └── memory.go            # Load / Content / Append / Save
 │   ├── model/
-│   │   ├── provider.go          # Provider interface + types
-│   │   └── lmstudio.go          # LM Studio implementation
+│   │   ├── provider.go          # Provider interface + Message/Response types
+│   │   └── lmstudio.go          # LM Studio OpenAI-compatible client + retry
 │   ├── rag/
-│   │   ├── chunker.go           # text → []Chunk
-│   │   ├── store.go             # vector store wrapper (chromem-go)
-│   │   └── engine.go            # index + retrieve orchestration
+│   │   ├── chunker.go           # text → []Chunk (tiktoken token counting)
+│   │   ├── manifest.go          # incremental index manifest (path → hash)
+│   │   ├── store.go             # chromem-go vector store + EmbedFunc
+│   │   └── engine.go            # Index + Retrieve orchestration
 │   ├── tools/
-│   │   ├── tool.go              # Tool interface + Registry
+│   │   ├── tool.go              # Tool interface + Registry + Definitions()
 │   │   ├── files.go             # read_file, write_file, delete_file
-│   │   ├── dir.go               # list_dir
-│   │   ├── search.go            # search_code
-│   │   ├── shell.go             # run_shell
+│   │   ├── dir.go               # list_dir (flat + recursive, skips .git)
+│   │   ├── search.go            # search_code (regex + glob, **/ support)
+│   │   ├── shell.go             # run_shell (cross-platform)
 │   │   ├── git.go               # git_status, git_diff, git_log, git_commit
-│   │   ├── web.go               # web_fetch, web_search
-│   │   └── codegen.go           # generate_code
+│   │   ├── web.go               # web_fetch, web_search (DuckDuckGo)
+│   │   └── codegen.go           # generate_code (injected model.Provider)
 │   └── worktree/
-│       └── worktree.go          # Create / Remove / Slug
+│       └── worktree.go          # Slug, Create, Remove, ErrNotGitRepo
 ├── test/
 │   └── e2e/
 │       └── smoke_test.go        # end-to-end test with mock LM Studio server
-├── .xdreamer.toml               # example project config
+├── .xdreamer.toml               # example project config with comments
 ├── go.mod
 ├── go.sum
 ├── SPEC.md
