@@ -102,6 +102,26 @@ public class LmStudioChatClientTests : IClassFixture<MockLmStudioServer>
         Assert.Equal("model-two", secondSentBody.RootElement.GetProperty("model").GetString());
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    public async Task CompleteAsync_AgainstEitherMockServerInstance_ProducesSameResult(int serverIndex)
+    {
+        using var serverA = new MockLmStudioServer();
+        using var serverB = new MockLmStudioServer();
+        serverA.SetResponse("""{"choices":[{"message":{"role":"assistant","content":"same result"}}]}""");
+        serverB.SetResponse("""{"choices":[{"message":{"role":"assistant","content":"same result"}}]}""");
+
+        // Same LmStudioChatClient code path either way — only config.llm.base_url differs (Validation Criterion #12).
+        MockLmStudioServer selectedServer = serverIndex == 0 ? serverA : serverB;
+        var client = new LmStudioChatClient(new LlmConfig(selectedServer.BaseUrl, "test-model", null));
+        var request = new ChatRequest(Messages: [new ChatMessage("user", "hi")], Tools: []);
+
+        ChatResponse response = await client.CompleteAsync(request);
+
+        Assert.Equal("same result", response.Content);
+    }
+
     private static int GetFreeTcpPort()
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);

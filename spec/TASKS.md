@@ -58,13 +58,13 @@
   - `LmStudioChatClientTests.CompleteAsync_UsesBaseUrlAndModelFromConfig_NoHardcodedEndpoint` — FUNC-SPEC §2
 
 ## Task 5: LLM backend test infrastructure & integration tests
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** TECH-SPEC §4 (Mocking Boundaries, Coverage Boundaries), §5 (tests/Agent.Tests/Llm/)
 - **Subtasks:**
-  - [ ] 5.1 Build `MockLmStudioServer.cs` — `HttpListener`-based in-process mock implementing `POST /v1/chat/completions`, `IClassFixture<T>`, disposed after use — TECH-SPEC §4
-  - [ ] 5.2 Integration test: LM Studio unreachable → immediate failure, zero retries — FUNC-SPEC §3 Validation Criterion #9, TECH-SPEC §4 row #9
-  - [ ] 5.3 Integration test: mock server request-shape + `tool_calls` handling — FUNC-SPEC §3 Validation Criterion #10, TECH-SPEC §4 row #10
-  - [ ] 5.4 Integration test (`[Theory]`): `base_url` swap to a second mock-server instance, zero code change, same test body — FUNC-SPEC §3 Validation Criterion #12, TECH-SPEC §4 row #12
+  - [x] 5.1 Build `MockLmStudioServer.cs` — `HttpListener`-based in-process mock implementing `POST /v1/chat/completions`, `IClassFixture<T>`, disposed after use — TECH-SPEC §4
+  - [x] 5.2 Integration test: LM Studio unreachable → immediate failure, zero retries — FUNC-SPEC §3 Validation Criterion #9, TECH-SPEC §4 row #9
+  - [x] 5.3 Integration test: mock server request-shape + `tool_calls` handling — FUNC-SPEC §3 Validation Criterion #10, TECH-SPEC §4 row #10
+  - [x] 5.4 Integration test (`[Theory]`): `base_url` swap to a second mock-server instance, zero code change, same test body — FUNC-SPEC §3 Validation Criterion #12, TECH-SPEC §4 row #12
 - **Tests (Definition of Done):**
   - `LmStudioChatClientTests.AgentLoop_LlmUnreachable_EmitsTaskCompleteFailureLlmUnreachable_ZeroRetries` — Validation Criterion #9, TECH-SPEC §4 row #9
   - `LmStudioChatClientTests.CompleteAsync_SendsOpenAiCompatibleRequestBody` — Validation Criterion #10, TECH-SPEC §4 row #10 (proves the `MockLmStudioServer` fixture)
