@@ -32,12 +32,12 @@
   - `WireMessagesTests.TaskCompleteMessage_RoundTripsThroughJsonContext` — FUNC-SPEC §2
 
 ## Task 3: NDJSON stdio transport
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (Wire Protocol), §3 (Validation Criterion #1); TECH-SPEC §3 (DIP), §5 (Transport/NdjsonStdio.cs)
 - **Subtasks:**
-  - [ ] 3.1 Implement `NdjsonStdio.cs` — line framing/reassembly over stdin/stdout, one JSON object per line — FUNC-SPEC §2
-  - [ ] 3.2 `AgentLoop` receives stdio via `Func<Task<string?>> ReadLine`/`Action<string> WriteLine` constructor params, never calling `Console.*` directly — TECH-SPEC §3 (DIP)
-  - [ ] 3.3 Unit test (`NdjsonStdioTests.cs`): NDJSON lines buffered/reassembled correctly across partial stdin reads — FUNC-SPEC §3 Validation Criterion #1, TECH-SPEC §4 row #1
+  - [x] 3.1 Implement `NdjsonStdio.cs` — line framing/reassembly over stdin/stdout, one JSON object per line — FUNC-SPEC §2
+  - [x] 3.2 `AgentLoop` receives stdio via `Func<Task<string?>> ReadLine`/`Action<string> WriteLine` constructor params, never calling `Console.*` directly — TECH-SPEC §3 (DIP)
+  - [x] 3.3 Unit test (`NdjsonStdioTests.cs`): NDJSON lines buffered/reassembled correctly across partial stdin reads — FUNC-SPEC §3 Validation Criterion #1, TECH-SPEC §4 row #1
 - **Tests (Definition of Done):**
   - `NdjsonStdioTests.ReadLine_ReassemblesMessageSplitAcrossMultiplePartialReads` — Validation Criterion #1, TECH-SPEC §4 row #1
   - `NdjsonStdioTests.ReadLine_ReturnsExactlyOneJsonObjectPerLine` — Validation Criterion #1
