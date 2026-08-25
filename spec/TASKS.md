@@ -201,10 +201,10 @@
   - `AgentLoopIntegrationTests.FullTaskLifecycle_AssertsOnCapturedOutput_NoRealStdioInvolved` — TECH-SPEC §3 (DIP example)
 
 ## Task 16: Program.cs composition root
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (Task Delivery); TECH-SPEC §2 (Wiring), §5 (Program.cs)
 - **Subtasks:**
-  - [ ] 16.1 `Program.cs` spawns with no task-specific argv, opens stdio and waits for the first `task` line; constructs `new LmStudioChatClient(config.llm)` and wires real `Console.In`/`Console.OpenStandardOutput()` stdio into `AgentLoop` via constructor injection, no DI container — FUNC-SPEC §2 Task Delivery, TECH-SPEC §2 (Wiring)
+  - [x] 16.1 `Program.cs` spawns with no task-specific argv, opens stdio and waits for the first `task` line; constructs `new LmStudioChatClient(config.llm)` and wires real `Console.In`/`Console.OpenStandardOutput()` stdio into `AgentLoop` via constructor injection, no DI container — FUNC-SPEC §2 Task Delivery, TECH-SPEC §2 (Wiring)
 - **Tests (Definition of Done):**
   - No automated unit test required — `Program.cs` is explicitly excluded from the 90% coverage target (TECH-SPEC §4 Coverage Target)
   - Verified instead by Task 18's manual smoke test (`scripts/smoke-lmstudio.ps1`), which invokes the published executable — i.e., `Program.cs` — end-to-end against a real LM Studio instance — TECH-SPEC §4 Manual Smoke Test
