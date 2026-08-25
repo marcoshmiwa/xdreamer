@@ -44,13 +44,13 @@
   - `AgentLoopTests.Constructor_UsesInjectedReadLineWriteLineDelegates_NeverTouchesConsole` — TECH-SPEC §3 (DIP)
 
 ## Task 4: LLM client port & adapter
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (LLM Backend Interface); TECH-SPEC §2 (Ports & Adapter), §3 (LSP, ISP), §5 (Llm/)
 - **Subtasks:**
-  - [ ] 4.1 Define `ILlmClient` port — single method `Task<ChatResponse> CompleteAsync(ChatRequest request)` — TECH-SPEC §2, §3 (ISP)
-  - [ ] 4.2 Define `ChatRequest`/`ChatResponse` plain types and `LlmUnreachableException` in `ChatModels.cs` — TECH-SPEC §2, §3 (LSP)
-  - [ ] 4.3 Implement `LmStudioChatClient : ILlmClient` — non-streaming POST `{base_url}/chat/completions`, OpenAI tool-calling schema, `base_url`/`model` sourced from `task.config.llm` — FUNC-SPEC §2
-  - [ ] 4.4 `LmStudioChatClient` maps connection failures to `LlmUnreachableException`, never a raw `HttpRequestException` — TECH-SPEC §3 (LSP)
+  - [x] 4.1 Define `ILlmClient` port — single method `Task<ChatResponse> CompleteAsync(ChatRequest request)` — TECH-SPEC §2, §3 (ISP)
+  - [x] 4.2 Define `ChatRequest`/`ChatResponse` plain types and `LlmUnreachableException` in `ChatModels.cs` — TECH-SPEC §2, §3 (LSP)
+  - [x] 4.3 Implement `LmStudioChatClient : ILlmClient` — non-streaming POST `{base_url}/chat/completions`, OpenAI tool-calling schema, `base_url`/`model` sourced from `task.config.llm` — FUNC-SPEC §2
+  - [x] 4.4 `LmStudioChatClient` maps connection failures to `LlmUnreachableException`, never a raw `HttpRequestException` — TECH-SPEC §3 (LSP)
 - **Tests (Definition of Done):**
   - `LmStudioChatClientTests.CompleteAsync_SendsOpenAiCompatibleRequestBody` — Validation Criterion #10, TECH-SPEC §4 row #10
   - `LmStudioChatClientTests.CompleteAsync_ParsesToolCallsFromResponse` — Validation Criterion #10
