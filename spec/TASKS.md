@@ -81,12 +81,12 @@
   - `TokenEstimatorTests.Estimate_OneTokenOverContextLimit_ExceedsLimit` — Validation Criterion #8
 
 ## Task 7: read_file tool
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (Tool I/O Contracts); TECH-SPEC §3 (SRP example), §5 (Tools/ReadFileTool.cs), §4 (Tool-Level Error Code Coverage)
 - **Subtasks:**
-  - [ ] 7.1 Implement `ReadFileTool` — input `path, offset?, limit?`; output `content, truncated`; calls only `File.ReadAllText`/`File.Exists`, never constructs a `tool_result` message — FUNC-SPEC §2, TECH-SPEC §3 (SRP)
-  - [ ] 7.2 Confirm `read_file` is ungated and unrestricted by `PathGuard` (no `path_outside_cwd` in its contract) — FUNC-SPEC §2, TECH-SPEC §5
-  - [ ] 7.3 Unit test error codes `not_found`, `is_directory`, `read_error` against a real temp dir — FUNC-SPEC §2, TECH-SPEC §4
+  - [x] 7.1 Implement `ReadFileTool` — input `path, offset?, limit?`; output `content, truncated`; calls only `File.ReadAllText`/`File.Exists`, never constructs a `tool_result` message — FUNC-SPEC §2, TECH-SPEC §3 (SRP)
+  - [x] 7.2 Confirm `read_file` is ungated and unrestricted by `PathGuard` (no `path_outside_cwd` in its contract) — FUNC-SPEC §2, TECH-SPEC §5
+  - [x] 7.3 Unit test error codes `not_found`, `is_directory`, `read_error` against a real temp dir — FUNC-SPEC §2, TECH-SPEC §4
 - **Tests (Definition of Done):**
   - `ReadFileToolTests.Execute_PathDoesNotExist_ReturnsNotFound` — FUNC-SPEC §2, TECH-SPEC §4 Tool-Level Error Code Coverage
   - `ReadFileToolTests.Execute_PathIsDirectory_ReturnsIsDirectory` — same
