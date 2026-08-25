@@ -155,19 +155,19 @@
   - `ToolDispatchTests.UngatedTools_AreExactlyReadFile` — same
 
 ## Task 13: AgentLoop core orchestration & state machine
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §3 (Core Behaviors, State Diagram, Failure Handling); TECH-SPEC §3 (SRP, OCP, DIP), §5 (AgentLoop.cs)
 - **Subtasks:**
-  - [ ] 13.1 Implement `AgentLoop` constructor taking `ILlmClient` + stdio delegates; state machine matches FUNC-SPEC's Mermaid diagram: AwaitingTask → CallingLLM → DispatchingTools → (ExecutingUngated | AwaitingPermission) → Complete/Failed — FUNC-SPEC §3, TECH-SPEC §3 (DIP)
-  - [ ] 13.2 Malformed/non-`task` first message → `task_complete failure/malformed_message`, `task_id: null`, non-zero exit — FUNC-SPEC §3 Failure Handling, Validation Criterion #2
-  - [ ] 13.3 A structurally-valid `task` message with missing/invalid `config` fields folds into the same `malformed_message` path — TECH-SPEC §6 finding #3
-  - [ ] 13.4 Permission correlation: distinct `id` per call within a turn; a `permission_response` with an unmatched `id` is not applied to any pending call — FUNC-SPEC §3, Validation Criterion #5
-  - [ ] 13.5 Denial handling: `deny` → `tool_result{success:false, error.code:permission_denied}` fed back to the LLM, loop continues — FUNC-SPEC §3 Denial Behavior, Validation Criterion #6
-  - [ ] 13.6 `max_turns` exceeded → `task_complete failure/max_turns_exceeded`, no further LLM calls made — FUNC-SPEC §3 Failure Handling, Validation Criterion #7
-  - [ ] 13.7 Pre-call token check: estimated tokens for the next request exceed `context_limit_tokens` → fail fast `context_limit_exceeded` before the LM Studio call is sent — FUNC-SPEC §3 Failure Handling, Validation Criterion #8
-  - [ ] 13.8 LM Studio connection error → immediate `task_complete failure/llm_unreachable`, zero retries — FUNC-SPEC §3 Failure Handling, Validation Criterion #9
-  - [ ] 13.9 `read_file` calls execute immediately without waiting on the orchestrator (never block) — FUNC-SPEC §3, Validation Criterion #3
-  - [ ] 13.10 OCP compliance: `AgentLoop` open to new `ILlmClient` implementations, closed to modification; the tool dispatch switch remains the sole documented OCP exception — TECH-SPEC §3 (OCP)
+  - [x] 13.1 Implement `AgentLoop` constructor taking `ILlmClient` + stdio delegates; state machine matches FUNC-SPEC's Mermaid diagram: AwaitingTask → CallingLLM → DispatchingTools → (ExecutingUngated | AwaitingPermission) → Complete/Failed — FUNC-SPEC §3, TECH-SPEC §3 (DIP)
+  - [x] 13.2 Malformed/non-`task` first message → `task_complete failure/malformed_message`, `task_id: null`, non-zero exit — FUNC-SPEC §3 Failure Handling, Validation Criterion #2
+  - [x] 13.3 A structurally-valid `task` message with missing/invalid `config` fields folds into the same `malformed_message` path — TECH-SPEC §6 finding #3
+  - [x] 13.4 Permission correlation: distinct `id` per call within a turn; a `permission_response` with an unmatched `id` is not applied to any pending call — FUNC-SPEC §3, Validation Criterion #5
+  - [x] 13.5 Denial handling: `deny` → `tool_result{success:false, error.code:permission_denied}` fed back to the LLM, loop continues — FUNC-SPEC §3 Denial Behavior, Validation Criterion #6
+  - [x] 13.6 `max_turns` exceeded → `task_complete failure/max_turns_exceeded`, no further LLM calls made — FUNC-SPEC §3 Failure Handling, Validation Criterion #7
+  - [x] 13.7 Pre-call token check: estimated tokens for the next request exceed `context_limit_tokens` → fail fast `context_limit_exceeded` before the LM Studio call is sent — FUNC-SPEC §3 Failure Handling, Validation Criterion #8
+  - [x] 13.8 LM Studio connection error → immediate `task_complete failure/llm_unreachable`, zero retries — FUNC-SPEC §3 Failure Handling, Validation Criterion #9
+  - [x] 13.9 `read_file` calls execute immediately without waiting on the orchestrator (never block) — FUNC-SPEC §3, Validation Criterion #3
+  - [x] 13.10 OCP compliance: `AgentLoop` open to new `ILlmClient` implementations, closed to modification; the tool dispatch switch remains the sole documented OCP exception — TECH-SPEC §3 (OCP)
 - **Tests (Definition of Done)** — verified by the aggregate of:
   - `AgentLoopTests.Run_FirstMessageNotTaskType_EmitsTaskCompleteFailureMalformedMessage` and `_ExitsNonZero` — Validation Criterion #2
   - `AgentLoopTests.Run_TaskMessageMissingRequiredConfigField_EmitsTaskCompleteFailureMalformedMessage` — TECH-SPEC §6 finding #3

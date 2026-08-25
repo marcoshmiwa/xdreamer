@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using Agent;
 using Agent.Llm;
 using Agent.Messages;
 using Xunit;
@@ -122,6 +123,41 @@ public class LmStudioChatClientTests : IClassFixture<MockLmStudioServer>
         Assert.Equal("same result", response.Content);
     }
 
+    [Fact]
+    public async Task AgentLoop_LlmUnreachable_EmitsTaskCompleteFailureLlmUnreachable_ZeroRetries()
+    {
+        using var refusingServer = new ConnectionCountingRefusingServer();
+        var llmClient = new LmStudioChatClient(new LlmConfig(refusingServer.BaseUrl, "test-model", null));
+
+        var taskMessage = new TaskMessage(
+            "task-1", "do stuff", Path.GetTempPath(),
+            new TaskConfig(new LlmConfig(refusingServer.BaseUrl, "test-model", null), MaxTurns: 5, ContextLimitTokens: 8192));
+        string taskLine = JsonSerializer.Serialize(taskMessage, JsonContext.Default.TaskMessage);
+
+        var incoming = new Queue<string?>([taskLine]);
+        var written = new List<string>();
+        var loop = new AgentLoop(
+            llmClient,
+            () => Task.FromResult(incoming.Count > 0 ? incoming.Dequeue() : null),
+            written.Add);
+
+        int exitCode = await loop.RunAsync();
+
+        Assert.NotEqual(0, exitCode);
+        var complete = JsonSerializer.Deserialize(written[^1], JsonContext.Default.TaskCompleteMessage);
+        Assert.Equal("failure", complete!.Result);
+        Assert.Equal("llm_unreachable", complete.Error!.Code);
+
+        // Poll briefly: the TCP accept on the server side is asynchronous relative to the client
+        // observing the connection failure, but zero retries means exactly one attempt was ever made.
+        for (int i = 0; i < 50 && refusingServer.ConnectionAttempts == 0; i++)
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(1, refusingServer.ConnectionAttempts);
+    }
+
     private static int GetFreeTcpPort()
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);
@@ -129,5 +165,62 @@ public class LmStudioChatClientTests : IClassFixture<MockLmStudioServer>
         int port = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
         return port;
+    }
+
+    /// <summary>Accepts a raw TCP connection and immediately resets it (no HTTP response), counting
+    /// attempts — used to prove LmStudioChatClient makes exactly one connection attempt, never retries.</summary>
+    private sealed class ConnectionCountingRefusingServer : IDisposable
+    {
+        private readonly TcpListener _listener;
+        private readonly CancellationTokenSource _cts = new();
+        private readonly Task _acceptLoop;
+
+        public string BaseUrl { get; }
+
+        public int ConnectionAttempts;
+
+        public ConnectionCountingRefusingServer()
+        {
+            _listener = new TcpListener(IPAddress.Loopback, 0);
+            _listener.Start();
+            int port = ((IPEndPoint)_listener.LocalEndpoint).Port;
+            BaseUrl = $"http://127.0.0.1:{port}/";
+            _acceptLoop = Task.Run(AcceptLoopAsync);
+        }
+
+        private async Task AcceptLoopAsync()
+        {
+            while (!_cts.IsCancellationRequested)
+            {
+                TcpClient client;
+                try
+                {
+                    client = await _listener.AcceptTcpClientAsync(_cts.Token).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+
+                Interlocked.Increment(ref ConnectionAttempts);
+                client.Client.LingerState = new LingerOption(true, 0);
+                client.Close();
+            }
+        }
+
+        public void Dispose()
+        {
+            _cts.Cancel();
+            _listener.Stop();
+            try
+            {
+                _acceptLoop.Wait(TimeSpan.FromSeconds(1));
+            }
+            catch (AggregateException)
+            {
+            }
+
+            _cts.Dispose();
+        }
     }
 }
