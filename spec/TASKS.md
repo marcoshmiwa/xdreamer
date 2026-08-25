@@ -183,10 +183,10 @@
   - `AgentLoopIntegrationTests.FullTaskLifecycle_AllFourTools_PermissionGate_EndsInTaskComplete` — Validation Criterion #11 (proves the overall state machine and OCP-compliant wiring together)
 
 ## Task 14: AgentLoop unit tests
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** TECH-SPEC §4 (Coverage Boundaries table)
 - **Subtasks:**
-  - [ ] 14.1 `AgentLoopTests.cs` covering Validation Criteria #2, #3, #5, #6, #7 against a fake transport — TECH-SPEC §4 rows #2, #3, #5, #6, #7
+  - [x] 14.1 `AgentLoopTests.cs` covering Validation Criteria #2, #3, #5, #6, #7 against a fake transport — TECH-SPEC §4 rows #2, #3, #5, #6, #7
 - **Tests (Definition of Done):**
   - `AgentLoopTests.cs` exists, tagged `[Trait("Category","Unit")]`, and contains and passes every `AgentLoopTests.*` method listed under Task 13 — TECH-SPEC §4 rows #2, #3, #5, #6, #7
 
