@@ -1,0 +1,22 @@
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Test / coverage output
+TestResults/
+[Cc]overage*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Native AOT / publish output (regenerated via `dotnet publish`)
+**/publish/
+
+# OS junk
+.DS_Store
+Thumbs.db

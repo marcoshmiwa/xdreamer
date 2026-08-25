@@ -1,14 +1,14 @@
 # Implementation Tasks
 
 ## Task 1: Project scaffolding & solution structure
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** TECH-SPEC §1 (Runtime & Language, Distribution), §5 (System Topology & File Structure)
 - **Subtasks:**
-  - [ ] 1.1 Create `global.json` pinning the SDK to the `10.0.1xx` feature band, .NET 10 LTS `>= 10.0.11` — TECH-SPEC §1
-  - [ ] 1.2 Create `Agent.sln` referencing `src/Agent/Agent.csproj` and `tests/Agent.Tests/Agent.Tests.csproj` — TECH-SPEC §5
-  - [ ] 1.3 Create `src/Agent/Agent.csproj` targeting `net10.0`, configured for self-contained trimmed Native AOT single-file publish — TECH-SPEC §1
-  - [ ] 1.4 Create `tests/Agent.Tests/Agent.Tests.csproj` referencing xUnit v3 4.0.0 and `coverlet.collector` (test-only) — TECH-SPEC §1, §4
-  - [ ] 1.5 Create directory shape `src/Agent/{Messages,Llm,Tools,Transport}/`, `tests/Agent.Tests/{Messages,Llm,Tools}/`, `scripts/` — TECH-SPEC §5
+  - [x] 1.1 Create `global.json` pinning the SDK to the `10.0.1xx` feature band, .NET 10 LTS `>= 10.0.11` — TECH-SPEC §1
+  - [x] 1.2 Create `Agent.sln` referencing `src/Agent/Agent.csproj` and `tests/Agent.Tests/Agent.Tests.csproj` — TECH-SPEC §5
+  - [x] 1.3 Create `src/Agent/Agent.csproj` targeting `net10.0`, configured for self-contained trimmed Native AOT single-file publish — TECH-SPEC §1
+  - [x] 1.4 Create `tests/Agent.Tests/Agent.Tests.csproj` referencing xUnit v3 4.0.0 and `coverlet.collector` (test-only) — TECH-SPEC §1, §4
+  - [x] 1.5 Create directory shape `src/Agent/{Messages,Llm,Tools,Transport}/`, `tests/Agent.Tests/{Messages,Llm,Tools}/`, `scripts/` — TECH-SPEC §5
 - **Tests (Definition of Done):**
   - *(No dedicated automated test in TECH-SPEC §4's Testing Strategy covers scaffolding — DoD is build-tooling verification, not an xUnit test.)*
   - `dotnet build Agent.sln` succeeds with `global.json` pinning the SDK to the `10.0.1xx` feature band — TECH-SPEC §1
