@@ -39,6 +39,35 @@ public class NdjsonStdioTests
     }
 
     [Fact]
+    public async Task ReadLine_StripsLeadingUtf8Bom()
+    {
+        // Some stdio clients (observed: PowerShell's Process.StandardInput) prepend a UTF-8 BOM
+        // to the very first bytes of the stream regardless of how the caller writes to it.
+        byte[] bom = [0xEF, 0xBB, 0xBF];
+        string json = "{\"type\":\"task\"}";
+        using var input = new MemoryStream([.. bom, .. Encoding.UTF8.GetBytes(json + "\n")]);
+        using var output = new MemoryStream();
+        var stdio = new NdjsonStdio(input, output);
+
+        string? line = await stdio.ReadLineAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(json, line);
+    }
+
+    [Fact]
+    public async Task ReadLine_NoBom_ReadsNormally()
+    {
+        string json = "{\"type\":\"task\"}";
+        using var input = new MemoryStream(Encoding.UTF8.GetBytes(json + "\n"));
+        using var output = new MemoryStream();
+        var stdio = new NdjsonStdio(input, output);
+
+        string? line = await stdio.ReadLineAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(json, line);
+    }
+
+    [Fact]
     public async Task ReadLine_ReturnsFinalLineEvenWithoutTrailingNewline()
     {
         using var input = new MemoryStream(Encoding.UTF8.GetBytes("""{"type":"task"}"""));

@@ -226,11 +226,11 @@
   - `dotnet list package --vulnerable --include-transitive` re-run at implementation time returns zero unpatched critical/high CVEs, and .NET/xUnit versions are re-checked against current advisories — TECH-SPEC §1
 
 ## Task 18: Native AOT publish & manual smoke test
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** TECH-SPEC §1 (Distribution), §4 (Manual (non-CI) Smoke Test)
 - **Subtasks:**
-  - [ ] 18.1 Configure `dotnet publish` as a self-contained, trimmed, Native AOT single-file executable targeting `net10.0`; document the framework-dependent self-contained fallback if AOT trimming ever conflicts with the JSON source-gen setup — TECH-SPEC §1
-  - [ ] 18.2 Create `scripts/smoke-lmstudio.ps1` — manual, non-CI script exercising the Validation Criterion #11 flow against a real LM Studio instance, invoking the `dotnet publish`-produced Native AOT single-file executable directly (not `dotnet run`) — TECH-SPEC §4
+  - [x] 18.1 Configure `dotnet publish` as a self-contained, trimmed, Native AOT single-file executable targeting `net10.0`; document the framework-dependent self-contained fallback if AOT trimming ever conflicts with the JSON source-gen setup — TECH-SPEC §1
+  - [x] 18.2 Create `scripts/smoke-lmstudio.ps1` — manual, non-CI script exercising the Validation Criterion #11 flow against a real LM Studio instance, invoking the `dotnet publish`-produced Native AOT single-file executable directly (not `dotnet run`) — TECH-SPEC §4
 - **Tests (Definition of Done):**
   - `dotnet publish` completes with no trimming/reflection warnings or errors, producing a working single-file executable — TECH-SPEC §1
   - Manual run of `scripts/smoke-lmstudio.ps1` against a real LM Studio instance completes a full task successfully, invoking the published binary directly (not `dotnet run`) — TECH-SPEC §4 Manual Smoke Test

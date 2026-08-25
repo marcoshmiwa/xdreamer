@@ -5,11 +5,14 @@ namespace Agent.Transport;
 /// <summary>Line framing/reassembly over stdin/stdout for the NDJSON wire protocol: one JSON object per line.</summary>
 public sealed class NdjsonStdio
 {
+    private static readonly byte[] Utf8Bom = [0xEF, 0xBB, 0xBF];
+
     private readonly Stream _input;
     private readonly Stream _output;
     private readonly byte[] _readBuffer = new byte[4096];
     private readonly List<byte> _pending = [];
     private bool _inputEnded;
+    private bool _bomChecked;
 
     public NdjsonStdio(Stream input, Stream output)
     {
@@ -23,6 +26,8 @@ public sealed class NdjsonStdio
     {
         while (true)
         {
+            StripLeadingBomOnce();
+
             int newlineIndex = _pending.IndexOf((byte)'\n');
             if (newlineIndex >= 0)
             {
@@ -54,6 +59,30 @@ public sealed class NdjsonStdio
             {
                 _pending.Add(_readBuffer[i]);
             }
+        }
+    }
+
+    /// <summary>Some stdio clients (observed: PowerShell's Process.StandardInput, whose default StreamWriter
+    /// emits a UTF-8 preamble on first flush regardless of how the caller writes to it) prepend a UTF-8 BOM
+    /// to the very first bytes of the stream. Strip it once, transparently, rather than requiring every
+    /// orchestrator to avoid it.</summary>
+    private void StripLeadingBomOnce()
+    {
+        if (_bomChecked)
+        {
+            return;
+        }
+
+        if (_pending.Count < Utf8Bom.Length && !_inputEnded)
+        {
+            return;
+        }
+
+        _bomChecked = true;
+        if (_pending.Count >= Utf8Bom.Length
+            && _pending[0] == Utf8Bom[0] && _pending[1] == Utf8Bom[1] && _pending[2] == Utf8Bom[2])
+        {
+            _pending.RemoveRange(0, Utf8Bom.Length);
         }
     }
 

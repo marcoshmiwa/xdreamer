@@ -1,5 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    Distribution (TECH-SPEC section 1): self-contained, trimmed, Native AOT single-file publish.
+    On Windows, "dotnet publish -c Release" requires the VC++ build tools (link.exe) on PATH,
+    which a plain shell won't have; run from a Developer Command Prompt/PowerShell for VS 2022,
+    or load it manually: & "VS install path\VC\Auxiliary\Build\vcvars64.bat" before publishing.
+    Fallback if AOT trimming ever conflicts with the JSON source-gen setup (section 1): drop
+    PublishAot below and publish framework-dependent self-contained instead
+    (dotnet publish -c Release -p:SelfContained=true -r rid), same TFM; no other project changes
+    needed, since JsonSerializerContext-based (de)serialization works identically either way.
+  -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
