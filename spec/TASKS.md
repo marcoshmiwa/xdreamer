@@ -210,14 +210,14 @@
   - Verified instead by Task 18's manual smoke test (`scripts/smoke-lmstudio.ps1`), which invokes the published executable — i.e., `Program.cs` — end-to-end against a real LM Studio instance — TECH-SPEC §4 Manual Smoke Test
 
 ## Task 17: CI & governance
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** TECH-SPEC §1 (Governance, CVE Audit), §4 (CI Wiring)
 - **Subtasks:**
-  - [ ] 17.1 CI runs `dotnet list package --vulnerable --include-transitive` on every build as the automated zero-tolerance CVE gate — TECH-SPEC §1
-  - [ ] 17.2 CI runs `dotnet test` (full unit + integration suite) on every push/PR — TECH-SPEC §4
-  - [ ] 17.3 Add `coverlet.collector` to the test project; collect cobertura-format coverage via `dotnet test --collect:"XPlat Code Coverage"` — TECH-SPEC §4
-  - [ ] 17.4 CI step enforces the 90% line-coverage target on domain logic (`AgentLoop`, tool handlers, `ILlmClient`/`LmStudioChatClient`, NDJSON transport, `TokenEstimator`; excludes `Program.cs`) via a `reportgenerator`-parsed cobertura gate, build-failing below threshold — TECH-SPEC §4
-  - [ ] 17.5 Re-run `dotnet list package --vulnerable --include-transitive` and re-check .NET/xUnit advisories at implementation time before publishing, since §1's CVE audit is a dated point-in-time snapshot (2026-08-23) — TECH-SPEC §1
+  - [x] 17.1 CI runs `dotnet list package --vulnerable --include-transitive` on every build as the automated zero-tolerance CVE gate — TECH-SPEC §1
+  - [x] 17.2 CI runs `dotnet test` (full unit + integration suite) on every push/PR — TECH-SPEC §4
+  - [x] 17.3 Add `coverlet.collector` to the test project; collect cobertura-format coverage via `dotnet test --collect:"XPlat Code Coverage"` — TECH-SPEC §4
+  - [x] 17.4 CI step enforces the 90% line-coverage target on domain logic (`AgentLoop`, tool handlers, `ILlmClient`/`LmStudioChatClient`, NDJSON transport, `TokenEstimator`; excludes `Program.cs`) via a `reportgenerator`-parsed cobertura gate, build-failing below threshold — TECH-SPEC §4
+  - [x] 17.5 Re-run `dotnet list package --vulnerable --include-transitive` and re-check .NET/xUnit advisories at implementation time before publishing, since §1's CVE audit is a dated point-in-time snapshot (2026-08-23) — TECH-SPEC §1
 - **Tests (Definition of Done)** — operational/pipeline verification, not xUnit tests:
   - CI run shows `dotnet list package --vulnerable --include-transitive` passing with zero unpatched critical/high CVEs — TECH-SPEC §1
   - CI run shows `dotnet test` executing the full unit + integration suite with zero failures — TECH-SPEC §4

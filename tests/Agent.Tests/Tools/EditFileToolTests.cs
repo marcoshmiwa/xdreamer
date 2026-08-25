@@ -34,6 +34,45 @@ public class EditFileToolTests
     }
 
     [Fact]
+    public void Execute_FileDoesNotExist_ReturnsOldStringNotFound()
+    {
+        using var tempDir = new ReadFileToolTests.TempDirectory();
+        string path = Path.Combine(tempDir.Path, "missing.txt");
+
+        var (output, error) = EditFileTool.Execute(new EditFileTool.Input(path, "old", "new", null), tempDir.Path);
+
+        Assert.Null(output);
+        Assert.Equal("old_string_not_found", error!.Code);
+    }
+
+    [Fact]
+    public void Execute_OldStringEmpty_ReturnsOldStringNotFound()
+    {
+        using var tempDir = new ReadFileToolTests.TempDirectory();
+        string path = Path.Combine(tempDir.Path, "file.txt");
+        File.WriteAllText(path, "hello world");
+
+        var (output, error) = EditFileTool.Execute(new EditFileTool.Input(path, "", "new", null), tempDir.Path);
+
+        Assert.Null(output);
+        Assert.Equal("old_string_not_found", error!.Code);
+    }
+
+    [Fact]
+    public void Execute_ReadFails_ReturnsWriteError()
+    {
+        using var tempDir = new ReadFileToolTests.TempDirectory();
+        string path = Path.Combine(tempDir.Path, "file.txt");
+        File.WriteAllText(path, "hello world");
+        using var lockStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None);
+
+        var (output, error) = EditFileTool.Execute(new EditFileTool.Input(path, "hello", "goodbye", null), tempDir.Path);
+
+        Assert.Null(output);
+        Assert.Equal("write_error", error!.Code);
+    }
+
+    [Fact]
     public void Execute_WriteFails_ReturnsWriteError()
     {
         using var tempDir = new ReadFileToolTests.TempDirectory();

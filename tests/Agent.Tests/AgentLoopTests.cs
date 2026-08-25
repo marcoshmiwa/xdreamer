@@ -63,6 +63,60 @@ public class AgentLoopTests
     }
 
     [Fact]
+    public async Task Run_FirstMessageIsNull_EmitsTaskCompleteFailureMalformedMessage()
+    {
+        var stdio = new ScriptedStdio();
+        var loop = new AgentLoop(new ThrowingLlmClient(), stdio.ReadLine, stdio.WriteLine);
+
+        int exitCode = await loop.RunAsync();
+
+        Assert.NotEqual(0, exitCode);
+        TaskCompleteMessage complete = stdio.LastAs(JsonContext.Default.TaskCompleteMessage);
+        Assert.Equal("malformed_message", complete.Error!.Code);
+    }
+
+    [Fact]
+    public async Task Run_FirstMessageInvalidJson_EmitsTaskCompleteFailureMalformedMessage()
+    {
+        var stdio = new ScriptedStdio("not valid json at all");
+        var loop = new AgentLoop(new ThrowingLlmClient(), stdio.ReadLine, stdio.WriteLine);
+
+        await loop.RunAsync();
+
+        TaskCompleteMessage complete = stdio.LastAs(JsonContext.Default.TaskCompleteMessage);
+        Assert.Equal("malformed_message", complete.Error!.Code);
+    }
+
+    [Fact]
+    public async Task Run_TaskMessageBlankRequiredField_EmitsTaskCompleteFailureMalformedMessage()
+    {
+        var stdio = new ScriptedStdio(
+            """{"type":"task","task_id":"","instructions":"do stuff","cwd":"C:\\repo","config":{"llm":{"base_url":"http://localhost:1234/v1","model":"m"},"max_turns":5,"context_limit_tokens":8000}}""");
+        var loop = new AgentLoop(new ThrowingLlmClient(), stdio.ReadLine, stdio.WriteLine);
+
+        await loop.RunAsync();
+
+        TaskCompleteMessage complete = stdio.LastAs(JsonContext.Default.TaskCompleteMessage);
+        Assert.Equal("malformed_message", complete.Error!.Code);
+        Assert.Null(complete.TaskId);
+    }
+
+    [Fact]
+    public async Task Run_StdinClosesWhileAwaitingPermissionResponse_EmitsTaskCompleteFailureInternalError()
+    {
+        var stdio = new ScriptedStdio(TaskLine());
+        var llm = new ScriptedLlmClient(ToolCallResponse(("call_A", "bash", """{"command":"echo hi"}""")));
+        var loop = new AgentLoop(llm, stdio.ReadLine, stdio.WriteLine);
+
+        int exitCode = await loop.RunAsync();
+
+        Assert.NotEqual(0, exitCode);
+        TaskCompleteMessage complete = stdio.LastAs(JsonContext.Default.TaskCompleteMessage);
+        Assert.Equal("failure", complete.Result);
+        Assert.Equal("internal_error", complete.Error!.Code);
+    }
+
+    [Fact]
     public async Task DispatchMultipleToolCallsInOneTurn_EachGetsDistinctId()
     {
         var stdio = new ScriptedStdio(TaskLine());

@@ -19,6 +19,43 @@ public class LmStudioChatClientTests : IClassFixture<MockLmStudioServer>
     }
 
     [Fact]
+    public void Constructor_BlankBaseUrl_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => new LmStudioChatClient(new LlmConfig("   ", "test-model", null)));
+    }
+
+    [Fact]
+    public void Constructor_BlankModel_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => new LmStudioChatClient(new LlmConfig("http://localhost:1234/v1", "   ", null)));
+    }
+
+    [Fact]
+    public async Task CompleteAsync_NonSuccessStatusCode_ThrowsLlmUnreachableException()
+    {
+        using var server = new MockLmStudioServer();
+        server.SetStatusCode(500);
+        var client = new LmStudioChatClient(new LlmConfig(server.BaseUrl, "test-model", null));
+        var request = new ChatRequest(Messages: [new ChatMessage("user", "hi")], Tools: []);
+
+        await Assert.ThrowsAsync<LlmUnreachableException>(() => client.CompleteAsync(request));
+    }
+
+    [Fact]
+    public async Task CompleteAsync_ResponseWithNoChoices_ReturnsNullContentAndEmptyToolCalls()
+    {
+        using var server = new MockLmStudioServer();
+        server.SetResponse("""{"choices":[]}""");
+        var client = new LmStudioChatClient(new LlmConfig(server.BaseUrl, "test-model", null));
+        var request = new ChatRequest(Messages: [new ChatMessage("user", "hi")], Tools: []);
+
+        ChatResponse response = await client.CompleteAsync(request);
+
+        Assert.Null(response.Content);
+        Assert.Empty(response.ToolCalls);
+    }
+
+    [Fact]
     public async Task CompleteAsync_SendsOpenAiCompatibleRequestBody()
     {
         _mockServer.SetResponse("""{"choices":[{"message":{"role":"assistant","content":"hello"}}]}""");

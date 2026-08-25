@@ -36,6 +36,14 @@ public class ToolDispatchTests
     }
 
     [Fact]
+    public void Execute_UnknownTool_ThrowsArgumentException()
+    {
+        JsonElement input = JsonSerializer.SerializeToElement(new { });
+
+        Assert.Throws<ArgumentException>(() => ToolDispatch.Execute("not_a_real_tool", input, Path.GetTempPath()));
+    }
+
+    [Fact]
     public void GatedTools_AreExactlyWriteFileEditFileBash()
     {
         Assert.Equal(["write_file", "edit_file", "bash"], ToolDispatch.GatedTools);

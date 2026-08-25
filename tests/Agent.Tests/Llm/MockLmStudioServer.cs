@@ -14,6 +14,7 @@ public sealed class MockLmStudioServer : IDisposable
     private readonly Task _acceptLoop;
     private readonly Queue<string> _queuedResponses = new();
     private string _responseJson = "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"ok\"}}]}";
+    private int _statusCode = 200;
 
     public string BaseUrl { get; }
 
@@ -38,6 +39,9 @@ public sealed class MockLmStudioServer : IDisposable
     /// to SetResponse's fixed body — lets a test script a distinct response per AgentLoop turn.</summary>
     public void EnqueueResponse(string json) => _queuedResponses.Enqueue(json);
 
+    /// <summary>Sets the HTTP status code returned for every subsequent request (default 200).</summary>
+    public void SetStatusCode(int statusCode) => _statusCode = statusCode;
+
     private async Task AcceptLoopAsync()
     {
         while (!_cts.IsCancellationRequested)
@@ -57,6 +61,7 @@ public sealed class MockLmStudioServer : IDisposable
 
             string responseJson = _queuedResponses.Count > 0 ? _queuedResponses.Dequeue() : _responseJson;
             byte[] responseBytes = Encoding.UTF8.GetBytes(responseJson);
+            context.Response.StatusCode = _statusCode;
             context.Response.ContentType = "application/json";
             context.Response.ContentLength64 = responseBytes.Length;
             await context.Response.OutputStream.WriteAsync(responseBytes).ConfigureAwait(false);

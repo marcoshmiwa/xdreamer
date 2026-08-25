@@ -85,6 +85,19 @@ public class ReadFileToolTests
         Assert.True(output.Truncated);
     }
 
+    [Fact]
+    public void Execute_NegativeOffset_ClampsToZero()
+    {
+        using var tempDir = new TempDirectory();
+        string path = Path.Combine(tempDir.Path, "file.txt");
+        File.WriteAllText(path, "a\nb\nc");
+
+        var (output, error) = ReadFileTool.Execute(new ReadFileTool.Input(path, Offset: -5, Limit: null));
+
+        Assert.Null(error);
+        Assert.Equal("a\nb\nc", output!.Content);
+    }
+
     /// <summary>Real Directory.CreateTempSubdirectory() per test, cleaned up in Dispose — never mocked
     /// (TECH-SPEC §4 Mocking Boundaries). Shared internally across the Tools test files.</summary>
     internal sealed class TempDirectory : IDisposable

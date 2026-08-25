@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Agent.sln
+
+      # Zero-tolerance CVE gate (TECH-SPEC §1): fail the build on any vulnerable package,
+      # direct or transitive, across every project in the solution.
+      - name: CVE gate — dotnet list package --vulnerable
+        run: |
+          output=$(dotnet list Agent.sln package --vulnerable --include-transitive)
+          echo "$output"
+          if echo "$output" | grep -q "has the following vulnerable packages"; then
+            echo "::error::Vulnerable package(s) detected — zero-tolerance CVE policy violated."
+            exit 1
+          fi
+
+      - name: Build
+        run: dotnet build Agent.sln --no-restore
+
+      # Full unit + integration suite in one run — no separate integration stage (TECH-SPEC §4 CI Wiring).
+      - name: Test with coverage
+        run: dotnet test --no-build -- --coverage --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
+
+      - name: Install reportgenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      # 90% line-coverage gate on domain logic (TECH-SPEC §4 Coverage Target). Program.cs (composition
+      # root) and generated code (source-gen'd JsonSerializerContext output under obj/) are excluded —
+      # neither is hand-written domain logic a bug could hide in.
+      - name: Enforce 90% domain-logic coverage gate
+        run: |
+          reportFile=$(find . -name "coverage.cobertura.xml" -path "*/TestResults/*" | head -n 1)
+          echo "Using coverage report: $reportFile"
+
+          reportgenerator \
+            "-reports:$reportFile" \
+            "-targetdir:CoverageReport" \
+            "-reporttypes:TextSummary" \
+            "-classfilters:-Program*" \
+            "-filefilters:-**/obj/**"
+          cat CoverageReport/Summary.txt
+
+          coverage=$(grep -oE "Line coverage: [0-9.]+" CoverageReport/Summary.txt | grep -oE "[0-9.]+")
+          echo "Domain-logic line coverage: ${coverage}%"
+          if ! awk -v cov="$coverage" 'BEGIN { exit !(cov >= 90) }'; then
+            echo "::error::Domain-logic coverage ${coverage}% is below the 90% target."
+            exit 1
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: CoverageReport/

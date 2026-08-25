@@ -52,4 +52,27 @@ public class BashToolTests
         Assert.Null(error);
         Assert.Equal(3, output!.ExitCode);
     }
+
+    [Fact]
+    public void Execute_WithCwd_RunsInSpecifiedDirectory()
+    {
+        using var tempDir = new ReadFileToolTests.TempDirectory();
+        string printCwdCommand = OperatingSystem.IsWindows() ? "cd" : "pwd";
+
+        var (output, error) = BashTool.Execute(new BashTool.Input(printCwdCommand, tempDir.Path, null));
+
+        Assert.Null(error);
+        Assert.Contains(Path.GetFileName(tempDir.Path.TrimEnd(Path.DirectorySeparatorChar)), output!.Stdout);
+    }
+
+    [Fact]
+    public void Execute_CwdDoesNotExist_ReturnsSpawnError()
+    {
+        string nonexistentCwd = Path.Combine(Path.GetTempPath(), "agent-tests-does-not-exist-" + Guid.NewGuid());
+
+        var (output, error) = BashTool.Execute(new BashTool.Input("echo hi", nonexistentCwd, null));
+
+        Assert.Null(output);
+        Assert.Equal("spawn_error", error!.Code);
+    }
 }

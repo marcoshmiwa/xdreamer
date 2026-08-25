@@ -29,4 +29,10 @@ public class TokenEstimatorTests
         Assert.Equal(ContextLimitTokens + 1, estimated);
         Assert.True(estimated > ContextLimitTokens);
     }
+
+    [Fact]
+    public void Estimate_EmptyString_ReturnsZero()
+    {
+        Assert.Equal(0, TokenEstimator.Estimate(string.Empty));
+    }
 }

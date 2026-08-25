@@ -38,6 +38,42 @@ public class NdjsonStdioTests
         Assert.Null(thirdLine);
     }
 
+    [Fact]
+    public async Task ReadLine_ReturnsFinalLineEvenWithoutTrailingNewline()
+    {
+        using var input = new MemoryStream(Encoding.UTF8.GetBytes("""{"type":"task"}"""));
+        using var output = new MemoryStream();
+        var stdio = new NdjsonStdio(input, output);
+
+        string? line = await stdio.ReadLineAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("""{"type":"task"}""", line);
+    }
+
+    [Fact]
+    public async Task ReadLine_TrimsTrailingCarriageReturn_ForCrlfLineEndings()
+    {
+        using var input = new MemoryStream(Encoding.UTF8.GetBytes("{\"a\":1}\r\n"));
+        using var output = new MemoryStream();
+        var stdio = new NdjsonStdio(input, output);
+
+        string? line = await stdio.ReadLineAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("{\"a\":1}", line);
+    }
+
+    [Fact]
+    public void WriteLine_WritesUtf8JsonPlusNewlineToOutputStream()
+    {
+        using var input = new MemoryStream();
+        using var output = new MemoryStream();
+        var stdio = new NdjsonStdio(input, output);
+
+        stdio.WriteLine("""{"type":"tool_result"}""");
+
+        Assert.Equal("{\"type\":\"tool_result\"}\n", Encoding.UTF8.GetString(output.ToArray()));
+    }
+
     /// <summary>Test double simulating a stdin pipe that only ever delivers one byte per read,
     /// regardless of the buffer size requested — forces reassembly across many partial reads.</summary>
     private sealed class SingleByteAtATimeStream(byte[] data) : Stream
