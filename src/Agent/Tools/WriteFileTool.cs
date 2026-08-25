@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Agent.Messages;
 
 namespace Agent.Tools;
@@ -7,9 +8,13 @@ namespace Agent.Tools;
 /// finding #2). Calls only File I/O — never constructs a tool_result message, that's AgentLoop's job (SRP).</summary>
 public static class WriteFileTool
 {
-    public sealed record Input(string Path, string Content);
+    public sealed record Input(
+        [property: JsonPropertyName("path")] string Path,
+        [property: JsonPropertyName("content")] string Content);
 
-    public sealed record Output(int BytesWritten, bool Created);
+    public sealed record Output(
+        [property: JsonPropertyName("bytes_written")] int BytesWritten,
+        [property: JsonPropertyName("created")] bool Created);
 
     public static (Output? Output, ToolError? Error) Execute(Input input, string cwd)
     {

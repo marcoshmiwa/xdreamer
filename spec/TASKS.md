@@ -144,11 +144,11 @@
   - `BashToolTests.Execute_CommandExceedsTimeoutMs_ReturnsSuccessTrueWithOutputTimedOutTrue` — TECH-SPEC §6 finding #1, §4
 
 ## Task 12: Tool dispatch & gating lookup
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §3 (Permission Gate); TECH-SPEC §2 (Rejected: Strategy/Command pattern), §5 (Tools/ToolDispatch.cs)
 - **Subtasks:**
-  - [ ] 12.1 Implement `ToolDispatch` — switch expression / static dictionary mapping tool name → handler function (no `ITool` interface, per TECH-SPEC §2's documented rejection) — TECH-SPEC §2
-  - [ ] 12.2 Implement gated-tool static lookup: `read_file` ungated; `write_file`/`edit_file`/`bash` gated — FUNC-SPEC §3 (Permission Gate)
+  - [x] 12.1 Implement `ToolDispatch` — switch expression / static dictionary mapping tool name → handler function (no `ITool` interface, per TECH-SPEC §2's documented rejection) — TECH-SPEC §2
+  - [x] 12.2 Implement gated-tool static lookup: `read_file` ungated; `write_file`/`edit_file`/`bash` gated — FUNC-SPEC §3 (Permission Gate)
 - **Tests (Definition of Done):**
   - *(Flagged: TECH-SPEC §5's tree draws no dedicated test file for `ToolDispatch.cs` under `Tools/`. `ToolDispatchTests.cs` is proposed on the same basis as Task 2's flag; the gating behavior is also exercised end-to-end by Validation Criterion #11.)*
   - `ToolDispatchTests.GatedTools_AreExactlyWriteFileEditFileBash` — FUNC-SPEC §3 (Permission Gate)

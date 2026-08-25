@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 using Agent.Messages;
 
 namespace Agent.Tools;
@@ -12,9 +13,16 @@ public static class BashTool
 {
     private const int DefaultTimeoutMs = 120_000;
 
-    public sealed record Input(string Command, string? Cwd, int? TimeoutMs);
+    public sealed record Input(
+        [property: JsonPropertyName("command")] string Command,
+        [property: JsonPropertyName("cwd")] string? Cwd,
+        [property: JsonPropertyName("timeout_ms")] int? TimeoutMs);
 
-    public sealed record Output(string Stdout, string Stderr, int ExitCode, bool TimedOut);
+    public sealed record Output(
+        [property: JsonPropertyName("stdout")] string Stdout,
+        [property: JsonPropertyName("stderr")] string Stderr,
+        [property: JsonPropertyName("exit_code")] int ExitCode,
+        [property: JsonPropertyName("timed_out")] bool TimedOut);
 
     public static (Output? Output, ToolError? Error) Execute(Input input)
     {

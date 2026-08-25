@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Agent.Messages;
 
 namespace Agent.Tools;
@@ -7,9 +8,14 @@ namespace Agent.Tools;
 /// attempt (old_string occurs more than once) is rejected rather than guessed at (§6 audit finding #8).</summary>
 public static class EditFileTool
 {
-    public sealed record Input(string Path, string OldString, string NewString, bool? ReplaceAll);
+    public sealed record Input(
+        [property: JsonPropertyName("path")] string Path,
+        [property: JsonPropertyName("old_string")] string OldString,
+        [property: JsonPropertyName("new_string")] string NewString,
+        [property: JsonPropertyName("replace_all")] bool? ReplaceAll);
 
-    public sealed record Output(int ReplacementsMade);
+    public sealed record Output(
+        [property: JsonPropertyName("replacements_made")] int ReplacementsMade);
 
     public static (Output? Output, ToolError? Error) Execute(Input input, string cwd)
     {

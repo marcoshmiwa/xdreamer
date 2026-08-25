@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Agent.Messages;
 
 namespace Agent.Tools;
@@ -7,9 +8,14 @@ namespace Agent.Tools;
 /// by PathGuard: read_file's contract has no path_outside_cwd error code (§6 audit finding #2).</summary>
 public static class ReadFileTool
 {
-    public sealed record Input(string Path, int? Offset, int? Limit);
+    public sealed record Input(
+        [property: JsonPropertyName("path")] string Path,
+        [property: JsonPropertyName("offset")] int? Offset,
+        [property: JsonPropertyName("limit")] int? Limit);
 
-    public sealed record Output(string Content, bool Truncated);
+    public sealed record Output(
+        [property: JsonPropertyName("content")] string Content,
+        [property: JsonPropertyName("truncated")] bool Truncated);
 
     public static (Output? Output, ToolError? Error) Execute(Input input)
     {
