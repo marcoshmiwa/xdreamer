@@ -12,6 +12,7 @@ public sealed class MockLmStudioServer : IDisposable
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
     private readonly Task _acceptLoop;
+    private readonly Queue<string> _queuedResponses = new();
     private string _responseJson = "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"ok\"}}]}";
 
     public string BaseUrl { get; }
@@ -29,8 +30,13 @@ public sealed class MockLmStudioServer : IDisposable
         _acceptLoop = Task.Run(AcceptLoopAsync);
     }
 
-    /// <summary>Sets the JSON body the mock returns for every subsequent request.</summary>
+    /// <summary>Sets the JSON body the mock returns for every subsequent request (once any enqueued
+    /// responses are exhausted).</summary>
     public void SetResponse(string json) => _responseJson = json;
+
+    /// <summary>Queues one JSON response to be returned for the next request only, before falling back
+    /// to SetResponse's fixed body — lets a test script a distinct response per AgentLoop turn.</summary>
+    public void EnqueueResponse(string json) => _queuedResponses.Enqueue(json);
 
     private async Task AcceptLoopAsync()
     {
@@ -49,7 +55,8 @@ public sealed class MockLmStudioServer : IDisposable
             using var reader = new StreamReader(context.Request.InputStream, Encoding.UTF8);
             LastRequestBody = await reader.ReadToEndAsync().ConfigureAwait(false);
 
-            byte[] responseBytes = Encoding.UTF8.GetBytes(_responseJson);
+            string responseJson = _queuedResponses.Count > 0 ? _queuedResponses.Dequeue() : _responseJson;
+            byte[] responseBytes = Encoding.UTF8.GetBytes(responseJson);
             context.Response.ContentType = "application/json";
             context.Response.ContentLength64 = responseBytes.Length;
             await context.Response.OutputStream.WriteAsync(responseBytes).ConfigureAwait(false);

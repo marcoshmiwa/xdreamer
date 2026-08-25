@@ -106,12 +106,12 @@
   - `PathGuardTests.EnsureWithinCwd_PathWithParentDirectoryTraversal_Throws` — same
 
 ## Task 9: write_file tool
-- **Status:** In Progress
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (Tool I/O Contracts — write_file), §3 (Validation Criterion #4); TECH-SPEC §6 finding #2, §5 (Tools/WriteFileTool.cs)
 - **Subtasks:**
   - [x] 9.1 Implement `WriteFileTool` — input `path, content`; output `bytes_written, created`; calls `PathGuard.EnsureWithinCwd` before writing — FUNC-SPEC §2, TECH-SPEC §6 finding #2
   - [x] 9.2 Unit test error codes `write_error`, `path_outside_cwd` against a real temp dir — FUNC-SPEC §2, TECH-SPEC §4
-  - [ ] 9.3 Unit test: gated tool produces zero side effects before matching `permission_response` arrives — FUNC-SPEC §3 Validation Criterion #4, TECH-SPEC §4 row #4
+  - [x] 9.3 Unit test: gated tool produces zero side effects before matching `permission_response` arrives — FUNC-SPEC §3 Validation Criterion #4, TECH-SPEC §4 row #4
 - **Tests (Definition of Done):**
   - `WriteFileToolTests.Execute_WriteFails_ReturnsWriteError` — FUNC-SPEC §2, TECH-SPEC §4
   - `WriteFileToolTests.Execute_PathOutsideCwd_ReturnsPathOutsideCwd` — same, exercises `PathGuard` (Task 8)
@@ -191,11 +191,11 @@
   - `AgentLoopTests.cs` exists, tagged `[Trait("Category","Unit")]`, and contains and passes every `AgentLoopTests.*` method listed under Task 13 — TECH-SPEC §4 rows #2, #3, #5, #6, #7
 
 ## Task 15: Full end-to-end fake-orchestrator integration test
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §3 (Validation Criterion #11); TECH-SPEC §3 (DIP example), §4 row #11, §5 (AgentLoopIntegrationTests.cs)
 - **Subtasks:**
-  - [ ] 15.1 `AgentLoopIntegrationTests.cs`: scripted fake orchestrator drives a full `task → (tool_call|permission_request) → permission_response → tool_result → task_complete` sequence against the mock LLM and a real temp directory, exercising all four tools plus the permission gate — FUNC-SPEC §3 Validation Criterion #11
-  - [ ] 15.2 Construct `new AgentLoop(mockLlmClient, fakeReadLine, fakeWriteLine)`, assert on captured output with zero real stdio involved — TECH-SPEC §3 (DIP example)
+  - [x] 15.1 `AgentLoopIntegrationTests.cs`: scripted fake orchestrator drives a full `task → (tool_call|permission_request) → permission_response → tool_result → task_complete` sequence against the mock LLM and a real temp directory, exercising all four tools plus the permission gate — FUNC-SPEC §3 Validation Criterion #11
+  - [x] 15.2 Construct `new AgentLoop(mockLlmClient, fakeReadLine, fakeWriteLine)`, assert on captured output with zero real stdio involved — TECH-SPEC §3 (DIP example)
 - **Tests (Definition of Done):**
   - `AgentLoopIntegrationTests.FullTaskLifecycle_AllFourTools_PermissionGate_EndsInTaskComplete` — Validation Criterion #11, TECH-SPEC §4 row #11
   - `AgentLoopIntegrationTests.FullTaskLifecycle_AssertsOnCapturedOutput_NoRealStdioInvolved` — TECH-SPEC §3 (DIP example)
