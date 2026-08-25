@@ -71,11 +71,11 @@
   - `LmStudioChatClientTests.CompleteAsync_AgainstEitherMockServerInstance_ProducesSameResult` (`[Theory]` over two `IClassFixture<MockLmStudioServer>` instances) — Validation Criterion #12, TECH-SPEC §4 row #12
 
 ## Task 6: Token estimator
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §3 (Failure Handling — context_limit_exceeded); TECH-SPEC §4 (Token Estimator Testability), §5 (TokenEstimator.cs)
 - **Subtasks:**
-  - [ ] 6.1 Implement `TokenEstimator.Estimate(string) -> int` as a standalone pure function — TECH-SPEC §4
-  - [ ] 6.2 Unit test at exact-limit and one-over-limit boundaries — FUNC-SPEC §3 Validation Criterion #8, TECH-SPEC §4 row #8
+  - [x] 6.1 Implement `TokenEstimator.Estimate(string) -> int` as a standalone pure function — TECH-SPEC §4
+  - [x] 6.2 Unit test at exact-limit and one-over-limit boundaries — FUNC-SPEC §3 Validation Criterion #8, TECH-SPEC §4 row #8
 - **Tests (Definition of Done):**
   - `TokenEstimatorTests.Estimate_AtExactContextLimit_DoesNotExceedLimit` — Validation Criterion #8, TECH-SPEC §4 row #8
   - `TokenEstimatorTests.Estimate_OneTokenOverContextLimit_ExceedsLimit` — Validation Criterion #8
