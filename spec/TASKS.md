@@ -118,12 +118,12 @@
   - `AgentLoopIntegrationTests.WriteFile_NoFileWrittenBeforePermissionResponseReceived` — Validation Criterion #4, TECH-SPEC §4 row #4 (authored under Task 15's `AgentLoopIntegrationTests.cs`)
 
 ## Task 10: edit_file tool
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (Tool I/O Contracts — edit_file); TECH-SPEC §6 finding #8, §5 (Tools/EditFileTool.cs)
 - **Subtasks:**
-  - [ ] 10.1 Implement `EditFileTool` — input `path, old_string, new_string, replace_all?` (default `false` per TECH-SPEC §6 finding #8); output `replacements_made`; calls `PathGuard.EnsureWithinCwd` — FUNC-SPEC §2
-  - [ ] 10.2 Unit test error codes `old_string_not_found`, `old_string_not_unique`, `write_error`, `path_outside_cwd` against a real temp dir — FUNC-SPEC §2, TECH-SPEC §4
-  - [ ] 10.3 Unit test: `replace_all` omitted defaults to `false` (first/only match); ambiguous single-replace attempt triggers `old_string_not_unique` — TECH-SPEC §6 finding #8
+  - [x] 10.1 Implement `EditFileTool` — input `path, old_string, new_string, replace_all?` (default `false` per TECH-SPEC §6 finding #8); output `replacements_made`; calls `PathGuard.EnsureWithinCwd` — FUNC-SPEC §2
+  - [x] 10.2 Unit test error codes `old_string_not_found`, `old_string_not_unique`, `write_error`, `path_outside_cwd` against a real temp dir — FUNC-SPEC §2, TECH-SPEC §4
+  - [x] 10.3 Unit test: `replace_all` omitted defaults to `false` (first/only match); ambiguous single-replace attempt triggers `old_string_not_unique` — TECH-SPEC §6 finding #8
 - **Tests (Definition of Done):**
   - `EditFileToolTests.Execute_OldStringNotFound_ReturnsOldStringNotFound` — FUNC-SPEC §2, TECH-SPEC §4
   - `EditFileToolTests.Execute_OldStringNotUnique_ReturnsOldStringNotUnique` — same
