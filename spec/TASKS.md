@@ -16,12 +16,12 @@
   - `dotnet test` resolves xUnit v3 4.0.0 and `coverlet.collector` in `Agent.Tests.csproj` — TECH-SPEC §1, §4
 
 ## Task 2: Wire protocol message types & JSON serialization
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (Wire Protocol, Message Schemas), TECH-SPEC §5 (Messages/)
 - **Subtasks:**
-  - [ ] 2.1 Define `task`, `tool_call`, `permission_request`, `permission_response`, `tool_result`, `task_complete` record types in `WireMessages.cs` — FUNC-SPEC §2
-  - [ ] 2.2 Define source-generated `JsonSerializerContext` in `JsonContext.cs` for all six message types (AOT-safe, no reflection) — TECH-SPEC §1, §5
-  - [ ] 2.3 Unit test NDJSON message round-trip (de)serialization for all six message types — FUNC-SPEC §2
+  - [x] 2.1 Define `task`, `tool_call`, `permission_request`, `permission_response`, `tool_result`, `task_complete` record types in `WireMessages.cs` — FUNC-SPEC §2
+  - [x] 2.2 Define source-generated `JsonSerializerContext` in `JsonContext.cs` for all six message types (AOT-safe, no reflection) — TECH-SPEC §1, §5
+  - [x] 2.3 Unit test NDJSON message round-trip (de)serialization for all six message types — FUNC-SPEC §2
 - **Tests (Definition of Done):**
   - *(Flagged: TECH-SPEC §5's tree draws no dedicated test file for `WireMessages.cs`/`JsonContext.cs` — only `NdjsonStdioTests.cs` appears under `Messages/`. `WireMessagesTests.cs` is proposed here per §5's own note that every `src/Agent/**` file has a direct test counterpart.)*
   - `WireMessagesTests.TaskMessage_RoundTripsThroughJsonContext` — FUNC-SPEC §2
