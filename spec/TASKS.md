@@ -95,11 +95,11 @@
   - *(Supplementary, not tied to a numbered criterion)* `ReadFileToolTests.Execute_PathOutsideCwd_DoesNotReturnPathOutsideCwdError` — regression guard for the intentionally-unrestricted contract: FUNC-SPEC §2 Tool I/O Contracts omits `path_outside_cwd` for `read_file`; TECH-SPEC §5 note
 
 ## Task 8: PathGuard shared containment check
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** TECH-SPEC §6 audit finding #2, §5 (Tools/PathGuard.cs)
 - **Subtasks:**
-  - [ ] 8.1 Implement `PathGuard.EnsureWithinCwd(path, cwd)` shared helper, used only by `WriteFileTool`/`EditFileTool` — TECH-SPEC §6 finding #2, §5
-  - [ ] 8.2 Unit test (`PathGuardTests.cs`) — containment cases: inside cwd, outside cwd, `..` traversal edge cases — TECH-SPEC §5, §4
+  - [x] 8.1 Implement `PathGuard.EnsureWithinCwd(path, cwd)` shared helper, used only by `WriteFileTool`/`EditFileTool` — TECH-SPEC §6 finding #2, §5
+  - [x] 8.2 Unit test (`PathGuardTests.cs`) — containment cases: inside cwd, outside cwd, `..` traversal edge cases — TECH-SPEC §5, §4
 - **Tests (Definition of Done):**
   - `PathGuardTests.EnsureWithinCwd_PathInsideCwd_DoesNotThrow` — TECH-SPEC §6 finding #2, §5
   - `PathGuardTests.EnsureWithinCwd_PathOutsideCwd_Throws` — same
