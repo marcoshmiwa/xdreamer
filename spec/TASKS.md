@@ -132,13 +132,13 @@
   - `EditFileToolTests.Execute_ReplaceAllOmitted_DefaultsToFalse_ReplacesFirstOccurrenceOnly` — TECH-SPEC §6 finding #8
 
 ## Task 11: bash tool
-- **Status:** Not Started
+- **Status:** Done
 - **Source:** FUNC-SPEC §2 (Tool I/O Contracts — bash); TECH-SPEC §6 finding #1, §3 (DIP scoping), §5 (Tools/BashTool.cs)
 - **Subtasks:**
-  - [ ] 11.1 Implement `BashTool` — input `command, cwd?, timeout_ms?`; output `stdout, stderr, exit_code, timed_out`; calls `System.Diagnostics.Process` directly (no interface abstraction) — FUNC-SPEC §2, TECH-SPEC §3 (DIP scoping)
-  - [ ] 11.2 On timeout, resolve as `success:true, output.timed_out:true` — never `error.code:"timeout"` — TECH-SPEC §6 finding #1
-  - [ ] 11.3 Unit test error code `spawn_error` on invalid command — TECH-SPEC §4
-  - [ ] 11.4 Unit test timeout behavior: `success:true, output:{timed_out:true}` — TECH-SPEC §6 finding #1, §4
+  - [x] 11.1 Implement `BashTool` — input `command, cwd?, timeout_ms?`; output `stdout, stderr, exit_code, timed_out`; calls `System.Diagnostics.Process` directly (no interface abstraction) — FUNC-SPEC §2, TECH-SPEC §3 (DIP scoping)
+  - [x] 11.2 On timeout, resolve as `success:true, output.timed_out:true` — never `error.code:"timeout"` — TECH-SPEC §6 finding #1
+  - [x] 11.3 Unit test error code `spawn_error` on invalid command — TECH-SPEC §4
+  - [x] 11.4 Unit test timeout behavior: `success:true, output:{timed_out:true}` — TECH-SPEC §6 finding #1, §4
 - **Tests (Definition of Done):**
   - `BashToolTests.Execute_InvalidCommand_ReturnsSpawnError` — TECH-SPEC §4 Tool-Level Error Code Coverage
   - `BashToolTests.Execute_CommandExceedsTimeoutMs_ReturnsSuccessTrueWithOutputTimedOutTrue` — TECH-SPEC §6 finding #1, §4
