@@ -106,11 +106,11 @@
   - `PathGuardTests.EnsureWithinCwd_PathWithParentDirectoryTraversal_Throws` — same
 
 ## Task 9: write_file tool
-- **Status:** Not Started
+- **Status:** In Progress
 - **Source:** FUNC-SPEC §2 (Tool I/O Contracts — write_file), §3 (Validation Criterion #4); TECH-SPEC §6 finding #2, §5 (Tools/WriteFileTool.cs)
 - **Subtasks:**
-  - [ ] 9.1 Implement `WriteFileTool` — input `path, content`; output `bytes_written, created`; calls `PathGuard.EnsureWithinCwd` before writing — FUNC-SPEC §2, TECH-SPEC §6 finding #2
-  - [ ] 9.2 Unit test error codes `write_error`, `path_outside_cwd` against a real temp dir — FUNC-SPEC §2, TECH-SPEC §4
+  - [x] 9.1 Implement `WriteFileTool` — input `path, content`; output `bytes_written, created`; calls `PathGuard.EnsureWithinCwd` before writing — FUNC-SPEC §2, TECH-SPEC §6 finding #2
+  - [x] 9.2 Unit test error codes `write_error`, `path_outside_cwd` against a real temp dir — FUNC-SPEC §2, TECH-SPEC §4
   - [ ] 9.3 Unit test: gated tool produces zero side effects before matching `permission_response` arrives — FUNC-SPEC §3 Validation Criterion #4, TECH-SPEC §4 row #4
 - **Tests (Definition of Done):**
   - `WriteFileToolTests.Execute_WriteFails_ReturnsWriteError` — FUNC-SPEC §2, TECH-SPEC §4
