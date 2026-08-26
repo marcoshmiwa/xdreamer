@@ -1,8 +1,8 @@
 using System.Text;
-using Agent.Transport;
+using xDreamer.Agent.Transport;
 using Xunit;
 
-namespace Agent.Tests.Messages;
+namespace xDreamer.Agent.Tests.Messages;
 
 [Trait("Category", "Unit")]
 public class NdjsonStdioTests

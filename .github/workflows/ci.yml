@@ -17,13 +17,13 @@ jobs:
           global-json-file: global.json
 
       - name: Restore
-        run: dotnet restore Agent.sln
+        run: dotnet restore xDreamer.Agent.sln
 
       # Zero-tolerance CVE gate (TECH-SPEC §1): fail the build on any vulnerable package,
       # direct or transitive, across every project in the solution.
       - name: CVE gate — dotnet list package --vulnerable
         run: |
-          output=$(dotnet list Agent.sln package --vulnerable --include-transitive)
+          output=$(dotnet list xDreamer.Agent.sln package --vulnerable --include-transitive)
           echo "$output"
           if echo "$output" | grep -q "has the following vulnerable packages"; then
             echo "::error::Vulnerable package(s) detected — zero-tolerance CVE policy violated."
@@ -31,7 +31,7 @@ jobs:
           fi
 
       - name: Build
-        run: dotnet build Agent.sln --no-restore
+        run: dotnet build xDreamer.Agent.sln --no-restore
 
       # Full unit + integration suite in one run — no separate integration stage (TECH-SPEC §4 CI Wiring).
       - name: Test with coverage

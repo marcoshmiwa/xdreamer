@@ -1,12 +1,12 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
-using Agent;
-using Agent.Llm;
-using Agent.Messages;
+using xDreamer.Agent;
+using xDreamer.Agent.Llm;
+using xDreamer.Agent.Messages;
 using Xunit;
 
-namespace Agent.Tests.Llm;
+namespace xDreamer.Agent.Tests.Llm;
 
 [Trait("Category", "Integration")]
 public class LmStudioChatClientTests : IClassFixture<MockLmStudioServer>

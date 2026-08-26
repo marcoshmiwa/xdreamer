@@ -1,4 +1,4 @@
-namespace Agent.Tools;
+namespace xDreamer.Agent.Tools;
 
 /// <summary>Shared cwd-containment check (§6 audit finding #2), used only by WriteFileTool/EditFileTool.
 /// read_file remains intentionally unrestricted — it has no path_outside_cwd error in its contract.</summary>

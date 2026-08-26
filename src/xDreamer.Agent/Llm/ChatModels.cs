@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Agent.Llm;
+namespace xDreamer.Agent.Llm;
 
 /// <summary>Backend-agnostic request to the LLM port. <see cref="ILlmClient"/> implementations translate
 /// this to/from their own wire shape (§2 Ports &amp; Adapter) — never leaks a backend-specific schema.</summary>

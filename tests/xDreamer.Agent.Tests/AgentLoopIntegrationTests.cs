@@ -1,12 +1,12 @@
 using System.Text.Json;
-using Agent;
-using Agent.Llm;
-using Agent.Messages;
-using Agent.Tests.Llm;
-using Agent.Tests.Tools;
+using xDreamer.Agent;
+using xDreamer.Agent.Llm;
+using xDreamer.Agent.Messages;
+using xDreamer.Agent.Tests.Llm;
+using xDreamer.Agent.Tests.Tools;
 using Xunit;
 
-namespace Agent.Tests;
+namespace xDreamer.Agent.Tests;
 
 /// <summary>The one true end-to-end test (TECH-SPEC §4): mock LLM + real temp dir + real process exec,
 /// fake stdio. Drives a full task -> (tool_call|permission_request) -> permission_response -> tool_result

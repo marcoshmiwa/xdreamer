@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using Agent.Messages;
+using xDreamer.Agent.Messages;
 
-namespace Agent.Tools;
+namespace xDreamer.Agent.Tools;
 
 /// <summary>Ungated tool: reads a file's contents. Calls only File.Exists/Directory.Exists/File.ReadAllText —
 /// never constructs a tool_result message, that's AgentLoop's job alone (SRP). Intentionally unrestricted

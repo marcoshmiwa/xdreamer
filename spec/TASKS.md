@@ -5,15 +5,15 @@
 - **Source:** TECH-SPEC §1 (Runtime & Language, Distribution), §5 (System Topology & File Structure)
 - **Subtasks:**
   - [x] 1.1 Create `global.json` pinning the SDK to the `10.0.1xx` feature band, .NET 10 LTS `>= 10.0.11` — TECH-SPEC §1
-  - [x] 1.2 Create `Agent.sln` referencing `src/Agent/Agent.csproj` and `tests/Agent.Tests/Agent.Tests.csproj` — TECH-SPEC §5
-  - [x] 1.3 Create `src/Agent/Agent.csproj` targeting `net10.0`, configured for self-contained trimmed Native AOT single-file publish — TECH-SPEC §1
-  - [x] 1.4 Create `tests/Agent.Tests/Agent.Tests.csproj` referencing xUnit v3 4.0.0 and `coverlet.collector` (test-only) — TECH-SPEC §1, §4
-  - [x] 1.5 Create directory shape `src/Agent/{Messages,Llm,Tools,Transport}/`, `tests/Agent.Tests/{Messages,Llm,Tools}/`, `scripts/` — TECH-SPEC §5
+  - [x] 1.2 Create `xDreamer.Agent.sln` referencing `src/xDreamer.Agent/xDreamer.Agent.csproj` and `tests/xDreamer.Agent.Tests/xDreamer.Agent.Tests.csproj` — TECH-SPEC §5
+  - [x] 1.3 Create `src/xDreamer.Agent/xDreamer.Agent.csproj` targeting `net10.0`, configured for self-contained trimmed Native AOT single-file publish — TECH-SPEC §1
+  - [x] 1.4 Create `tests/xDreamer.Agent.Tests/xDreamer.Agent.Tests.csproj` referencing xUnit v3 4.0.0 and `coverlet.collector` (test-only) — TECH-SPEC §1, §4
+  - [x] 1.5 Create directory shape `src/xDreamer.Agent/{Messages,Llm,Tools,Transport}/`, `tests/xDreamer.Agent.Tests/{Messages,Llm,Tools}/`, `scripts/` — TECH-SPEC §5
 - **Tests (Definition of Done):**
   - *(No dedicated automated test in TECH-SPEC §4's Testing Strategy covers scaffolding — DoD is build-tooling verification, not an xUnit test.)*
-  - `dotnet build Agent.sln` succeeds with `global.json` pinning the SDK to the `10.0.1xx` feature band — TECH-SPEC §1
-  - `dotnet publish src/Agent/Agent.csproj -c Release` succeeds, producing a self-contained, trimmed, Native AOT single-file executable — TECH-SPEC §1
-  - `dotnet test` resolves xUnit v3 4.0.0 and `coverlet.collector` in `Agent.Tests.csproj` — TECH-SPEC §1, §4
+  - `dotnet build xDreamer.Agent.sln` succeeds with `global.json` pinning the SDK to the `10.0.1xx` feature band — TECH-SPEC §1
+  - `dotnet publish src/xDreamer.Agent/xDreamer.Agent.csproj -c Release` succeeds, producing a self-contained, trimmed, Native AOT single-file executable — TECH-SPEC §1
+  - `dotnet test` resolves xUnit v3 4.0.0 and `coverlet.collector` in `xDreamer.Agent.Tests.csproj` — TECH-SPEC §1, §4
 
 ## Task 2: Wire protocol message types & JSON serialization
 - **Status:** Done
@@ -23,7 +23,7 @@
   - [x] 2.2 Define source-generated `JsonSerializerContext` in `JsonContext.cs` for all six message types (AOT-safe, no reflection) — TECH-SPEC §1, §5
   - [x] 2.3 Unit test NDJSON message round-trip (de)serialization for all six message types — FUNC-SPEC §2
 - **Tests (Definition of Done):**
-  - *(Flagged: TECH-SPEC §5's tree draws no dedicated test file for `WireMessages.cs`/`JsonContext.cs` — only `NdjsonStdioTests.cs` appears under `Messages/`. `WireMessagesTests.cs` is proposed here per §5's own note that every `src/Agent/**` file has a direct test counterpart.)*
+  - *(Flagged: TECH-SPEC §5's tree draws no dedicated test file for `WireMessages.cs`/`JsonContext.cs` — only `NdjsonStdioTests.cs` appears under `Messages/`. `WireMessagesTests.cs` is proposed here per §5's own note that every `src/xDreamer.Agent/**` file has a direct test counterpart.)*
   - `WireMessagesTests.TaskMessage_RoundTripsThroughJsonContext` — FUNC-SPEC §2
   - `WireMessagesTests.ToolCallMessage_RoundTripsThroughJsonContext` — FUNC-SPEC §2
   - `WireMessagesTests.PermissionRequestMessage_RoundTripsThroughJsonContext` — FUNC-SPEC §2
@@ -59,7 +59,7 @@
 
 ## Task 5: LLM backend test infrastructure & integration tests
 - **Status:** Done
-- **Source:** TECH-SPEC §4 (Mocking Boundaries, Coverage Boundaries), §5 (tests/Agent.Tests/Llm/)
+- **Source:** TECH-SPEC §4 (Mocking Boundaries, Coverage Boundaries), §5 (tests/xDreamer.Agent.Tests/Llm/)
 - **Subtasks:**
   - [x] 5.1 Build `MockLmStudioServer.cs` — `HttpListener`-based in-process mock implementing `POST /v1/chat/completions`, `IClassFixture<T>`, disposed after use — TECH-SPEC §4
   - [x] 5.2 Integration test: LM Studio unreachable → immediate failure, zero retries — FUNC-SPEC §3 Validation Criterion #9, TECH-SPEC §4 row #9

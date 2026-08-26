@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>Agent.Tests</RootNamespace>
+    <RootNamespace>xDreamer.Agent.Tests</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>Exe</OutputType>
@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Agent\Agent.csproj" />
+    <ProjectReference Include="..\..\src\xDreamer.Agent\xDreamer.Agent.csproj" />
   </ItemGroup>
 
 </Project>

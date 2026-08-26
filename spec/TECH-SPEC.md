@@ -80,7 +80,7 @@
 
 ## 4. Testing Strategy
 
-**Test Project Structure**: single xUnit v3 4.0.0 project `Agent.Tests` (per §1). Unit and integration tests are collocated but tagged `[Trait("Category", "Unit"|"Integration")]` so CI can report/filter each independently. No separate e2e project.
+**Test Project Structure**: single xUnit v3 4.0.0 project `xDreamer.Agent.Tests` (per §1). Unit and integration tests are collocated but tagged `[Trait("Category", "Unit"|"Integration")]` so CI can report/filter each independently. No separate e2e project.
 
 **Mocking Boundaries** (consistent with the DIP scoping fixed in §3):
 - **LLM backend**: `System.Net.HttpListener`-based in-process mock server implementing `POST /v1/chat/completions` (per §1), one instance per test class via `IClassFixture<T>`, disposed after. No real LM Studio process in any automated test.
@@ -133,20 +133,20 @@
 
 ## 5. System Topology & File Structure
 
-**Project Split**: single executable project (`src/Agent/`) — no separate Core-library/Cli-host split. `dotnet publish` targets one AOT single-file output (§1); boundaries defined in §3 (e.g., `AgentLoop` depending on `ILlmClient` rather than `LmStudioChatClient`) are enforced by convention and code review, not a compiler-checked project reference, since the codebase is small (~12–15 files).
+**Project Split**: single executable project (`src/xDreamer.Agent/`) — no separate Core-library/Cli-host split. `dotnet publish` targets one AOT single-file output (§1); boundaries defined in §3 (e.g., `AgentLoop` depending on `ILlmClient` rather than `LmStudioChatClient`) are enforced by convention and code review, not a compiler-checked project reference, since the codebase is small (~12–15 files).
 
-**Directory Shape**: component subfolders (`Llm/`, `Tools/`, `Transport/`, `Messages/`) under `src/Agent/`, matching the component boundaries already named in §2–§3.
+**Directory Shape**: component subfolders (`Llm/`, `Tools/`, `Transport/`, `Messages/`) under `src/xDreamer.Agent/`, matching the component boundaries already named in §2–§3.
 
-**Test Layout**: `tests/Agent.Tests/` mirrors `src/Agent/` folder-for-folder. Integration tests sit beside their unit-test siblings in the same folder, distinguished only by `[Trait("Category","Integration")]` and an `*IntegrationTests.cs` filename suffix — no separate top-level `Integration/` folder.
+**Test Layout**: `tests/xDreamer.Agent.Tests/` mirrors `src/xDreamer.Agent/` folder-for-folder. Integration tests sit beside their unit-test siblings in the same folder, distinguished only by `[Trait("Category","Integration")]` and an `*IntegrationTests.cs` filename suffix — no separate top-level `Integration/` folder.
 
 **Tree Structure**:
 ```text
 /
 ├── global.json                      # SDK feature-band pin (§1)
-├── Agent.sln
+├── xDreamer.Agent.sln
 ├── src/
-│   └── Agent/
-│       ├── Agent.csproj             # net10.0, AOT/trimmed, single-file publish
+│   └── xDreamer.Agent/
+│       ├── xDreamer.Agent.csproj    # net10.0, AOT/trimmed, single-file publish
 │       ├── Program.cs               # composition root: wires LmStudioChatClient + stdio into AgentLoop
 │       ├── AgentLoop.cs             # loop controller: turns, tool dispatch, permission-gate correlation
 │       ├── TokenEstimator.cs        # pure function, §4
@@ -167,8 +167,8 @@
 │       └── Transport/
 │           └── NdjsonStdio.cs       # line framing/reassembly over stdin/stdout
 ├── tests/
-│   └── Agent.Tests/
-│       ├── Agent.Tests.csproj       # xUnit v3, coverlet.collector (§4)
+│   └── xDreamer.Agent.Tests/
+│       ├── xDreamer.Agent.Tests.csproj # xUnit v3, coverlet.collector (§4)
 │       ├── AgentLoopTests.cs            # Unit — Validation Criteria #2,3,5,6,7
 │       ├── AgentLoopIntegrationTests.cs # Integration — Validation Criteria #4,11
 │       ├── TokenEstimatorTests.cs       # Unit — Validation Criterion #8
@@ -190,7 +190,7 @@
 ```
 
 **Notes**:
-- Every `src/Agent/**` file has a direct test counterpart at the same relative path under `tests/Agent.Tests/**`.
+- Every `src/xDreamer.Agent/**` file has a direct test counterpart at the same relative path under `tests/xDreamer.Agent.Tests/**`.
 - `MockLmStudioServer.cs` is the one test-only fixture with no `src/` equivalent; it lives in `Llm/` since that's the component it fakes.
 - In-memory fake stdio delegates (for `AgentLoop` construction in tests) are defined directly in `AgentLoopTests.cs`/`AgentLoopIntegrationTests.cs` — no separate `TestHelpers/` folder, given the small file count.
 - `PathGuard.cs`/`PathGuardTests.cs` added per the Step 8 audit (§6): a shared containment check used only by `WriteFileTool`/`EditFileTool`. `read_file` remains intentionally unrestricted — it has no `path_outside_cwd` in its FUNC-SPEC error-code contract, so reads may go outside `cwd` while writes stay sandboxed.

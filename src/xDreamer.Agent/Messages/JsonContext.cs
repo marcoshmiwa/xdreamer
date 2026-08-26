@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Agent.Messages;
+namespace xDreamer.Agent.Messages;
 
 [JsonSourceGenerationOptions(WriteIndented = false)]
 [JsonSerializable(typeof(TaskMessage))]

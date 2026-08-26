@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Agent.Messages;
+using xDreamer.Agent.Messages;
 using Xunit;
 
-namespace Agent.Tests.Messages;
+namespace xDreamer.Agent.Tests.Messages;
 
 [Trait("Category", "Unit")]
 public class WireMessagesTests

@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using Agent.Messages;
+using xDreamer.Agent.Messages;
 
-namespace Agent.Tools;
+namespace xDreamer.Agent.Tools;
 
 /// <summary>Gated tool: replaces an exact substring within a file. Calls PathGuard.EnsureWithinCwd before
 /// writing (§6 audit finding #2). replace_all defaults to false when omitted — an ambiguous single-replace

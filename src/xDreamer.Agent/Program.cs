@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Agent;
-using Agent.Llm;
-using Agent.Messages;
-using Agent.Transport;
+using xDreamer.Agent;
+using xDreamer.Agent.Llm;
+using xDreamer.Agent.Messages;
+using xDreamer.Agent.Transport;
 
 // Composition root: no task-specific argv — the process opens stdio and waits for the first task line.
 // AgentLoop needs an ILlmClient at construction time, but config.llm only becomes known once that first

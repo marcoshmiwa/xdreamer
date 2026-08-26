@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Agent.Tests.Llm;
+namespace xDreamer.Agent.Tests.Llm;
 
 /// <summary>In-process HttpListener-based mock implementing POST /chat/completions, for testing
 /// LmStudioChatClient without a real LM Studio process. One instance per test class via

@@ -2,9 +2,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Agent.Messages;
+using xDreamer.Agent.Messages;
 
-namespace Agent.Llm;
+namespace xDreamer.Agent.Llm;
 
 /// <summary>Sole <see cref="ILlmClient"/> adapter: non-streaming POST {base_url}/chat/completions against
 /// LM Studio's OpenAI-compatible endpoint, using the OpenAI tool-calling schema.</summary>

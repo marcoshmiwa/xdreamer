@@ -1,7 +1,7 @@
-using Agent.Tools;
+using xDreamer.Agent.Tools;
 using Xunit;
 
-namespace Agent.Tests.Tools;
+namespace xDreamer.Agent.Tests.Tools;
 
 [Trait("Category", "Unit")]
 public class ReadFileToolTests

@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json.Serialization;
-using Agent.Messages;
+using xDreamer.Agent.Messages;
 
-namespace Agent.Tools;
+namespace xDreamer.Agent.Tools;
 
 /// <summary>Gated tool: writes a file's contents. Calls PathGuard.EnsureWithinCwd before writing (§6 audit
 /// finding #2). Calls only File I/O — never constructs a tool_result message, that's AgentLoop's job (SRP).</summary>

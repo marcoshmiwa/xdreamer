@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Agent.Messages;
+namespace xDreamer.Agent.Messages;
 
 /// <summary>First message only (orchestrator to agent); starts the loop.</summary>
 public sealed record TaskMessage(

@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
-using Agent.Messages;
+using xDreamer.Agent.Messages;
 
-namespace Agent.Tools;
+namespace xDreamer.Agent.Tools;
 
 /// <summary>Gated tool: runs a shell command. Calls System.Diagnostics.Process directly — no interface
 /// abstraction (DIP is scoped narrowly and does not extend to tool handlers, TECH-SPEC §3). A command that

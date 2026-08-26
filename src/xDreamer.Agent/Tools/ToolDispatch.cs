@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using Agent.Messages;
+using xDreamer.Agent.Messages;
 
-namespace Agent.Tools;
+namespace xDreamer.Agent.Tools;
 
 /// <summary>Switch expression mapping tool name → handler function, plus the gated-tool static lookup
 /// (§2: no ITool interface — the tool set is spec-fixed at exactly four, not extensible).</summary>

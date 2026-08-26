@@ -1,7 +1,7 @@
-using Agent;
+using xDreamer.Agent;
 using Xunit;
 
-namespace Agent.Tests;
+namespace xDreamer.Agent.Tests;
 
 [Trait("Category", "Unit")]
 public class TokenEstimatorTests

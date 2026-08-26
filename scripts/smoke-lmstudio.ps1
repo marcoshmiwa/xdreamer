@@ -47,16 +47,16 @@ if (-not (Test-Path $Cwd)) {
 }
 
 Write-Host "Publishing the Native AOT single-file executable (dotnet publish -c Release)..." -ForegroundColor Cyan
-& dotnet publish (Join-Path $repoRoot "src\Agent\Agent.csproj") -c Release
+& dotnet publish (Join-Path $repoRoot "src\xDreamer.Agent\xDreamer.Agent.csproj") -c Release
 if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish failed with exit code $LASTEXITCODE. On Windows this usually means the VC++ build tools aren't on PATH -see the comment in src/Agent/Agent.csproj."
+    throw "dotnet publish failed with exit code $LASTEXITCODE. On Windows this usually means the VC++ build tools aren't on PATH -see the comment in src/xDreamer.Agent/xDreamer.Agent.csproj."
 }
 
-$exeCandidates = @(Get-ChildItem -Path (Join-Path $repoRoot "src\Agent\bin") -Recurse -File -Include "Agent.exe", "Agent" -ErrorAction SilentlyContinue |
+$exeCandidates = @(Get-ChildItem -Path (Join-Path $repoRoot "src\xDreamer.Agent\bin") -Recurse -File -Include "xDreamer.Agent.exe", "xDreamer.Agent" -ErrorAction SilentlyContinue |
     Where-Object { $_.DirectoryName -like "*\publish" } |
     Sort-Object LastWriteTime -Descending)
 if ($exeCandidates.Count -eq 0) {
-    throw "Could not find a published Agent executable under src/Agent/bin/**/publish/."
+    throw "Could not find a published xDreamer.Agent executable under src/xDreamer.Agent/bin/**/publish/."
 }
 $exePath = $exeCandidates[0].FullName
 

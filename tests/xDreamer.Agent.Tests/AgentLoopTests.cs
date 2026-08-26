@@ -1,10 +1,10 @@
 using System.Text.Json;
-using Agent;
-using Agent.Llm;
-using Agent.Messages;
+using xDreamer.Agent;
+using xDreamer.Agent.Llm;
+using xDreamer.Agent.Messages;
 using Xunit;
 
-namespace Agent.Tests;
+namespace xDreamer.Agent.Tests;
 
 [Trait("Category", "Unit")]
 public class AgentLoopTests

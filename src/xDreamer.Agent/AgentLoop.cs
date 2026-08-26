@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
-using Agent.Llm;
-using Agent.Messages;
-using Agent.Tools;
+using xDreamer.Agent.Llm;
+using xDreamer.Agent.Messages;
+using xDreamer.Agent.Tools;
 
-namespace Agent;
+namespace xDreamer.Agent;
 
 /// <summary>Loop controller: turns, tool dispatch, permission-gate correlation. Depends only on ILlmClient
 /// and the stdio delegates — never on Console or HttpClient directly (DIP). Open to new ILlmClient

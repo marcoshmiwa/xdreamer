@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Agent.Transport;
+namespace xDreamer.Agent.Transport;
 
 /// <summary>Line framing/reassembly over stdin/stdout for the NDJSON wire protocol: one JSON object per line.</summary>
 public sealed class NdjsonStdio
